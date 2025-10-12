@@ -7,14 +7,14 @@ export async function GET(
   req: Request,
   context: { params: Promise<{ category: string }> }
 ) {
-  // ✅ params는 Promise라 await 필요
+  // params는 Promise라 await 필요
   const { category } = await context.params;
 
   if (!VALID_CATEGORIES.includes(category)) {
     return NextResponse.json({ ok: false, error: "Invalid category" });
   }
 
-  // ✅ Nookipedia API endpoint 매핑
+  // Nookipedia API endpoint 매핑
   const endpointMap: Record<string, string> = {
     fish: "https://api.nookipedia.com/nh/fish",
     bug: "https://api.nookipedia.com/nh/bugs",
@@ -39,7 +39,7 @@ export async function GET(
 
     let normalized: any[] = [];
 
-    // ✅ 화석: 구조가 다르기 때문에 별도 처리
+    // 화석: 구조가 다르기 때문에 별도 처리
     if (category === "fossil") {
       for (const dino of rawData) {
         for (const fossil of dino.fossils) {
@@ -54,7 +54,7 @@ export async function GET(
         }
       }
     } else {
-      // ✅ 물고기, 곤충, 해양생물
+      // 물고기, 곤충, 해양생물
       normalized = rawData.map((item: any) => ({
         originalName: item.name, // 영어 원본 이름 (key용)
         name: nameKoMap[item.name] || item.name, // 한글 이름
@@ -68,7 +68,7 @@ export async function GET(
 
     return NextResponse.json({ ok: true, data: normalized });
   } catch (err) {
-    console.error("❌ Nookipedia fetch error:", err);
+    console.error("Nookipedia fetch error:", err);
     return NextResponse.json({ ok: false, error: "Server error" });
   }
 }

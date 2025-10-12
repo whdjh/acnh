@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import useQueryTab from "./hook/useQueryTab";
 
 interface Item {
-  name: string;        // 한글 이름
+  name: string; // 한글 이름
   originalName: string; // 영어 이름 (key용)
   image_url: string;
   location?: string;
@@ -142,7 +142,7 @@ export default function ListPage() {
             )}
             {item.sell_nook && (
               <div className="text-center text-xs text-gray-400">
-                {item.sell_nook.toLocaleString()} Bells
+                {item.sell_nook.toLocaleString()} 벨
               </div>
             )}
           </div>

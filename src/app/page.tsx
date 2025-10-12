@@ -34,10 +34,10 @@ export default function HomePage() {
         return;
       }
 
-      // ✅ 로그인 또는 회원가입 성공 시 user 저장
+      // 로그인 또는 회원가입 성공 시 user 저장
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // ✅ 강제 리디렉션
+      // 강제 리디렉션
       window.location.href = "/list";
     } catch (err) {
       console.error(err);
