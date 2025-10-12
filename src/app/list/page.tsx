@@ -45,17 +45,9 @@ export default function ListPage() {
         if (data.ok) {
           const formatted = data.data.map((item: any) => ({
             ...item,
-            originalName: item.originalName || item.name_en || item.name, // 영어 원본 이름
+            originalName: item.originalName || item.name_en || item.name,
           }));
           setItems(formatted);
-
-          console.log(`${activeTab} 원본 데이터 ↓`);
-          console.log(
-            formatted.map((i: any) => ({
-              name: i.name,
-              location: i.location,
-            }))
-          );
         } else {
           alert(`데이터 불러오기 실패: ${data.error}`);
         }
@@ -91,9 +83,23 @@ export default function ListPage() {
   return (
     <div className="p-4">
       <header className="mb-4">
-        <h1 className="text-xl font-bold">
-          {user.username}님의 {activeTab.toUpperCase()} 도감
-        </h1>
+        <div className="flex items-center gap-5 mb-2">
+          <h1 className="text-xl font-bold">
+            {user.username}님의{" "}
+            {activeTab === "fish"
+              ? "물고기"
+              : activeTab === "bug"
+                ? "곤충"
+                : activeTab === "sea"
+                  ? "해양생물"
+                  : "화석"}{" "}
+            도감
+          </h1>
+          <span className="text-sm">
+            {user.hemisphere === "north" ? "북반구" : "남반구"}
+          </span>
+        </div>
+
         <div className="flex gap-2 mt-3">
           {["fish", "bug", "sea", "fossil"].map((tab) => (
             <button
@@ -146,7 +152,6 @@ export default function ListPage() {
               </div>
             )}
           </div>
-
         ))}
       </div>
     </div>
