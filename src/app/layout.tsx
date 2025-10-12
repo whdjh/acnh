@@ -3,8 +3,8 @@ import "../styles/globals.css";
 
 
 export const metadata: Metadata = {
-  title: "allright",
-  description: "운동템포 조절",
+  title: "모동숲 도감",
+  description: "모동숲",
 };
 
 export default function RootLayout({
@@ -14,8 +14,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body>
-        {children}
+      <body
+        className="min-h-screen bg-cover bg-center bg-fixed relative"
+        style={{ backgroundImage: "url('/background.jpg')" }}
+      >
+        <div className="absolute inset-0 "></div> {/* 어두운 오버레이 */}
+        <div className="relative z-10">{children}</div>
       </body>
     </html>
   );

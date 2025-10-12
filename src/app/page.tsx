@@ -1,24 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
+type Mode = "login" | "signup";
+type Hemisphere = "north" | "south";
 
 export default function HomePage() {
-  const [mode, setMode] = useState<"login" | "signup">("login");
+  const [mode, setMode] = useState<Mode>("login");
   const [username, setUsername] = useState("");
-  const [hemisphere, setHemisphere] = useState("north");
+  const [hemisphere, setHemisphere] = useState<Hemisphere>("north");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit() {
-    if (!username.trim()) {
-      alert("아이디를 입력해주세요.");
-      return;
-    }
+  const handleSubmit = useCallback(async () => {
+    const trimmed = username.trim();
+    if (!trimmed) return;
 
     setLoading(true);
 
     const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
     const body =
-      mode === "login" ? { username } : { username, hemisphere };
+      mode === "login" ? { username: trimmed } : { username: trimmed, hemisphere };
 
     try {
       const res = await fetch(endpoint, {
@@ -29,15 +39,12 @@ export default function HomePage() {
       const data = await res.json();
 
       if (!data.ok) {
-        alert(data.error || "로그인 실패");
+        alert(data.error || (mode === "login" ? "로그인 실패" : "회원가입 실패"));
         setLoading(false);
         return;
       }
 
-      // 로그인 또는 회원가입 성공 시 user 저장
       localStorage.setItem("user", JSON.stringify(data.user));
-
-      // 강제 리디렉션
       window.location.href = "/list";
     } catch (err) {
       console.error(err);
@@ -45,54 +52,75 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [username, hemisphere, mode]);
+
+  const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void handleSubmit();
+    }
+  };
 
   return (
-    <div className="flex flex-col gap-4 max-w-xs mx-auto mt-20">
-      <h1 className="text-xl font-bold text-center">
-        모동숲 도감 로그인
-      </h1>
+    <div className="min-h-[calc(100dvh-4rem)] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 backdrop-blur p-5 shadow-sm mb-40">
+        <div className="flex flex-col gap-3">
+          {/* 아이디 */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-muted-foreground">아이디</label>
+            <Input
+              placeholder="아이디를 입력하세요"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onKeyDown={onKeyDown}
+              disabled={loading}
+            />
+          </div>
 
-      <input
-        className="border p-2 rounded"
-        placeholder="아이디 입력"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
+          {/* 회원가입에서만 반구 선택 */}
+          {mode === "signup" && (
+            <div className="flex flex-col gap-1">
+              <label className="text-sm text-muted-foreground">반구 선택</label>
+              <Select
+                value={hemisphere}
+                onValueChange={(v) => setHemisphere(v as Hemisphere)}
+                disabled={loading}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="반구를 선택하세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="north">북반구</SelectItem>
+                  <SelectItem value="south">남반구</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-      {mode === "signup" && (
-        <select
-          className="border p-2 rounded"
-          value={hemisphere}
-          onChange={(e) => setHemisphere(e.target.value)}
-        >
-          <option value="north">북반구</option>
-          <option value="south">남반구</option>
-        </select>
-      )}
+          {/* 액션 */}
+          <Button
+            className="w-full"
+            onClick={handleSubmit}
+            disabled={loading || username.trim().length === 0}
+          >
+            {loading
+              ? "처리 중..."
+              : mode === "login"
+                ? "로그인"
+                : "회원가입"}
+          </Button>
 
-      <button
-        className="border p-2 rounded bg-blue-500 text-white disabled:opacity-50"
-        onClick={handleSubmit}
-        disabled={loading}
-      >
-        {loading
-          ? "처리 중..."
-          : mode === "login"
-            ? "로그인"
-            : "회원가입"}
-      </button>
-
-      <button
-        className="text-sm text-blue-500"
-        onClick={() =>
-          setMode(mode === "login" ? "signup" : "login")
-        }
-      >
-        {mode === "login"
-          ? "회원가입으로 이동"
-          : "로그인으로 이동"}
-      </button>
+          <Button
+            variant="link"
+            className="w-full text-sm"
+            type="button"
+            onClick={() => setMode((m) => (m === "login" ? "signup" : "login"))}
+            disabled={loading}
+          >
+            {mode === "login" ? "회원가입으로 이동" : "로그인으로 이동"}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

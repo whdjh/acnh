@@ -431,9 +431,6 @@ export default function ListPage() {
                 <div className="text-[11px] text-gray-700">
                   시간: {timesText}
                 </div>
-                <div className="text-[11px] text-gray-500">
-                  (필터 기준: {String(selectedHour).padStart(2, "0")}시)
-                </div>
               </div>
             </div>
           );
