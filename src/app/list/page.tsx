@@ -1,4 +1,3 @@
-// src/app/list/page.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -16,15 +15,6 @@ import ItemsGridSkeleton from "@/components/list/ItemsGridSkeleton";
 import ListHeaderSkeleton from "@/components/list/ListHeaderSkeleton";
 
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
-
-// 페이지 안에서만 쓰는 간단한 빈 상태
-function EmptyState({ text }: { text: string }) {
-  return (
-    <div className="text-sm text-muted-foreground py-12 text-center">
-      {text}
-    </div>
-  );
-}
 
 export default function ListPage() {
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
