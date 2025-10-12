@@ -69,7 +69,7 @@ export default function HomePage() {
           <div className="flex flex-col gap-1">
             <label className="text-sm text-muted-foreground">아이디</label>
             <Input
-              placeholder="아이디를 입력하세요"
+              placeholder="한글 또는 영어로 입력하세요"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={onKeyDown}
