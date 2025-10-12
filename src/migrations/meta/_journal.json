@@ -8,6 +8,13 @@
       "when": 1760249960992,
       "tag": "0000_closed_kronos",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1760266871095,
+      "tag": "0001_thin_ben_urich",
+      "breakpoints": true
     }
   ]
 }
