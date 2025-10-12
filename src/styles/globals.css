@@ -1,47 +1,24 @@
 @import "tailwindcss";
 @import './fonts.css';
 
+@font-face {
+  font-family: '87mmilsang';
+  src: url('./fonts/87MMILSANG-Regular.woff2') format('woff2'),
+       url('./fonts/87MMILSANG-Regular.woff') format('woff');
+  font-display: swap;
+}
+
 :root {
+  --font-primary: '87mmilsang';
   --background: #1a1a1e;
   --foreground: #f3f4f6;
   --primary: #c179ff;
-  --purple-500: #BF5eff;
-  --purple-600: #a339ff;
-  --purple-700: #9900ff;
-  --purple-750: #9952ff;
-  --bg-34343A: #34343a;
-  --gray-50: #9CA3AF;
-  --gray-100: #29292C;
-  --gray-400: #D1D5DB;
-  --gray-500: #6b7280;
-  --gray-600: #4b5563;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #f3f4f6;
-    --gray-50: #9CA3AF;
-    --gray-400: #D1D5DB;
-  }
-}
-
-/* 커스텀 글로벌 스타일 추가 가능 */
 @layer base {
-  html {
-    --font-pretendard:
-      'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
-      system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo',
-      'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji',
-      'Segoe UI Symbol', sans-serif;
-  }
-
-  body {
-    font-family: var(--font-pretendard);
-  }
-
   html,
   body {
+    font-family: var(--font-primary);
     margin: 0;
     padding: 0;
     -webkit-font-smoothing: antialiased;
