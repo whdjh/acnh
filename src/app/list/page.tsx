@@ -7,12 +7,11 @@ import useQueryTab from "./hook/useQueryTab";
 interface HemisphereMonths { months_array: number[] } // 1~12
 type Category = "fish" | "bug" | "sea" | "fossil";
 
-// API가 주는 times_by_month는 구현마다 포맷이 달 수 있어 범용적으로 처리
 type TimesByMonthValue =
-  | string                             // "All day" | "4 AM – 9 PM, 7 PM – 4 AM"
-  | number[]                           // [0,1,2,...]  (시간 배열)
-  | boolean[]                          // 길이 24 (시간별 가능/불가)
-  | { start: string; end: string }[]   // [{start:"4 AM", end:"9 PM"}, ...]
+  | string
+  | number[]
+  | boolean[]
+  | { start: string; end: string }[]
   | null
   | undefined;
 
@@ -23,11 +22,9 @@ interface Item {
   location?: string;
   sell_nook?: number;
 
-  // 반구별 존재 월 정보
   north: HemisphereMonths;
   south: HemisphereMonths;
 
-  // 엔드포인트가 내려주는 시간 정보 (다양한 포맷 고려)
   times_by_month?: Record<string, TimesByMonthValue>;
   north_times_by_month?: Record<string, TimesByMonthValue>;
   south_times_by_month?: Record<string, TimesByMonthValue>;
@@ -39,19 +36,13 @@ const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
 // --- 시간 파싱 유틸 ---
 function parseClockToHour(s: string): number | null {
   const str = s.trim().toLowerCase();
-  if (str.includes("all")) return null; // All day 같은 경우
-
+  if (str.includes("all")) return null;
   const m = str.match(/^(\d{1,2})(?::(\d{1,2}))?\s*(am|pm)?$/i);
   if (!m) return null;
-
   let h = parseInt(m[1], 10);
   const ampm = (m[3] || "").toLowerCase();
-
-  if (ampm === "am") {
-    if (h === 12) h = 0;
-  } else if (ampm === "pm") {
-    if (h !== 12) h += 12;
-  }
+  if (ampm === "am") { if (h === 12) h = 0; }
+  else if (ampm === "pm") { if (h !== 12) h += 12; }
   return (h >= 0 && h <= 23) ? h : null;
 }
 
@@ -59,7 +50,6 @@ function rangeToHours(startStr: string, endStr: string): number[] {
   const sh = parseClockToHour(startStr);
   const eh = parseClockToHour(endStr);
   if (sh === null || eh === null) return [];
-
   const hours: number[] = [];
   if (sh <= eh) {
     for (let h = sh; h <= eh; h++) hours.push(h);
@@ -72,16 +62,13 @@ function rangeToHours(startStr: string, endStr: string): number[] {
 
 function stringTimesToHourSet(val: string): Set<number> {
   const s = val.trim().toLowerCase();
-  if (!s || s.includes("all")) return new Set([...Array(24).keys()]); // All day
-
+  if (!s || s.includes("all")) return new Set([...Array(24).keys()]);
   const parts = s.split(/[,/&;]+/).map((p) => p.trim()).filter(Boolean);
   const hours: number[] = [];
-
   for (const part of parts) {
     const mm = part.split(/-|–|—/).map((x) => x.trim());
-    if (mm.length === 2) {
-      hours.push(...rangeToHours(mm[0], mm[1]));
-    } else {
+    if (mm.length === 2) hours.push(...rangeToHours(mm[0], mm[1]));
+    else {
       const h = parseClockToHour(part);
       if (h !== null) hours.push(h);
     }
@@ -96,7 +83,7 @@ function normalizeTimesToHourSet(val: TimesByMonthValue): Set<number> {
   if (Array.isArray(val)) {
     if (val.length === 24 && typeof val[0] === "boolean") {
       const hours: number[] = [];
-      (val as boolean[]).forEach((ok, h) => { if (ok) hours.push(h) });
+      (val as boolean[]).forEach((ok, h) => { if (ok) hours.push(h); });
       return new Set(hours);
     }
     if (val.length > 0 && typeof val[0] === "number") {
@@ -115,19 +102,18 @@ function normalizeTimesToHourSet(val: TimesByMonthValue): Set<number> {
   return new Set();
 }
 
-function isAvailableNowByTimes(item: Item, month: number, hourNow: number, hemi: "north" | "south"): boolean {
+function isAvailableAtHour(item: Item, month: number, hour: number, hemi: "north" | "south"): boolean {
   const key = String(month);
   const hemiTimes =
     (hemi === "north" ? item.north_times_by_month?.[key] : item.south_times_by_month?.[key]);
   const commonTimes = item.times_by_month?.[key];
   const val = hemiTimes ?? commonTimes;
   if (val == null) return false;
-
   const hourSet = normalizeTimesToHourSet(val);
-  return hourSet.has(hourNow);
+  return hourSet.has(hour);
 }
 
-// --- 표시용 포맷 유틸 ---
+// --- 표시용 ---
 function compressHourList(hours: number[]): string {
   const uniq = Array.from(new Set(hours)).sort((a, b) => a - b);
   if (uniq.length === 24) return "종일";
@@ -163,7 +149,6 @@ function formatTimesForMonth(item: Item, month: number, hemi: "north" | "south")
     if (!s) return "정보 없음";
     if (/all\s*day/i.test(s)) return "종일";
 
-    // "4 AM – 9 PM, 7 PM – 4 AM" → "04–21시, 19–04시"
     const segs = s
       .toLowerCase()
       .split(/[,/&;]+/)
@@ -183,7 +168,9 @@ function formatTimesForMonth(item: Item, month: number, hemi: "north" | "south")
         if (a && b) {
           const sh = to24(a), eh = to24(b);
           if (sh == null || eh == null) return seg;
-          return `${String(sh).padStart(2, "0")}–${String(eh).padStart(2, "0")}시`;
+          return sh > eh
+            ? `${String(sh).padStart(2, "0")}–다음날 ${String(eh).padStart(2, "0")}시`
+            : `${String(sh).padStart(2, "0")}–${String(eh).padStart(2, "0")}시`;
         }
         const hh = to24(seg);
         return hh == null ? seg : `${String(hh).padStart(2, "0")}시`;
@@ -219,18 +206,9 @@ export default function ListPage() {
   const [caught, setCaught] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  // 현재 시각 & “지금만 보기” 스위치
-  const [nowOnly, setNowOnly] = useState<boolean>(true);
-  const [now, setNow] = useState<Date>(new Date());
-
-  // 월 선택 (기본: 현재 월)
+  // 사용자가 선택하는 월/시간
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
-
-  // 1분마다 현재 시각 갱신
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
-  }, []);
+  const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
 
   // user 로드
   useEffect(() => {
@@ -264,7 +242,7 @@ export default function ListPage() {
       });
   }, [user, activeTab]);
 
-  // 월/탭에 맞는 아이템 목록 로드 (only=1 → 월 필터 서버에서 적용 중)
+  // 월/탭에 맞는 아이템 목록 GET
   useEffect(() => {
     if (!user) return;
     setLoading(true);
@@ -342,15 +320,11 @@ export default function ListPage() {
     }
   }
 
-  // 정렬: 안 잡은 것 먼저, 이름 오름차순 + 실시간 필터
-  const hourNow = now.getHours(); // 로컬(브라우저) 시간
+  // 필터/정렬
   const hemi: "north" | "south" = (user?.hemisphere === "south" ? "south" : "north");
 
   const displayedItems = useMemo(() => {
-    const base = nowOnly
-      ? items.filter((it) => isAvailableNowByTimes(it, selectedMonth, hourNow, hemi))
-      : items;
-
+    const base = items.filter((it) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
     const list = [...base];
     list.sort((a, b) => {
       const aCaught = caught.has(a.originalName) ? 1 : 0;
@@ -359,32 +333,25 @@ export default function ListPage() {
       return a.name.localeCompare(b.name, "ko");
     });
     return list;
-  }, [items, caught, nowOnly, hourNow, hemi, selectedMonth]);
+  }, [items, caught, selectedHour, hemi, selectedMonth]);
 
   if (!user) return null;
-
-  const timeLabel = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ${String(hourNow).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
   return (
     <div className="p-4">
       <header className="mb-4">
-        <div className="flex flex-wrap items-center gap-5 mb-2">
+        <div className="flex flex-wrap items-center gap-4 mb-2">
           <h1 className="text-xl font-bold">
             {user.username}님의{" "}
-            {activeTab === "fish"
-              ? "물고기"
-              : activeTab === "bug"
-                ? "곤충"
-                : activeTab === "sea"
-                  ? "해양생물"
-                  : "화석"}{" "}
-            도감
+            {activeTab === "fish" ? "물고기" :
+              activeTab === "bug" ? "곤충" :
+                activeTab === "sea" ? "해양생물" : "화석"} 도감
           </h1>
           <span className="text-sm">{hemi === "north" ? "북반구" : "남반구"}</span>
 
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="text-xs text-gray-600">현재 시각: {timeLabel}</div>
-            <div className="flex items-center">
+          {/* 오른쪽 컨트롤 */}
+          <div className="flex items-center gap-3 ml-auto">
+            {/* 월 선택 */}
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
@@ -395,15 +362,16 @@ export default function ListPage() {
                 ))}
               </select>
 
-              <label className="flex items-center gap-1 text-sm text-gray-700 ml-3">
-                <input
-                  type="checkbox"
-                  checked={nowOnly}
-                  onChange={(e) => setNowOnly(e.target.checked)}
-                />
-                실시간
-              </label>
-            </div>
+            {/* 시간 선택 */}
+              <select
+                value={selectedHour}
+                onChange={(e) => setSelectedHour(Number(e.target.value))}
+                className="border px-2 py-1 rounded"
+              >
+                {Array.from({ length: 24 }, (_, h) => h).map((h) => (
+                  <option key={h} value={h}>{String(h).padStart(2, "0")}시</option>
+                ))}
+              </select>
           </div>
         </div>
 
@@ -424,7 +392,7 @@ export default function ListPage() {
 
       {!loading && displayedItems.length === 0 && (
         <div className="text-sm text-gray-500 py-12 text-center">
-          {nowOnly ? "지금 잡을 수 있는 항목이 없습니다." : "해당 조건에 맞는 항목이 없습니다."}
+          해당 조건에 맞는 항목이 없습니다.
         </div>
       )}
 
@@ -449,7 +417,6 @@ export default function ListPage() {
               />
               <div className="text-center text-sm font-medium mt-1">{item.name}</div>
 
-              {/* 위치/가격 */}
               {item.location && (
                 <div className="text-center text-xs text-gray-500">{item.location}</div>
               )}
@@ -459,10 +426,13 @@ export default function ListPage() {
                 </div>
               )}
 
-              {/* 월/시간 표시 */}
+              {/* 시간 요약 + 필터 기준 */}
               <div className="mt-1 text-center">
-                <div className="mt-1 text-[11px] text-gray-700">
+                <div className="text-[11px] text-gray-700">
                   시간: {timesText}
+                </div>
+                <div className="text-[11px] text-gray-500">
+                  (필터 기준: {String(selectedHour).padStart(2, "0")}시)
                 </div>
               </div>
             </div>
