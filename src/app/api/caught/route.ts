@@ -4,8 +4,10 @@ import { db } from "@/lib/db";
 import { caughtItems, categoryEnum } from "@/db/schema";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-type Category = typeof categoryEnum.enumValues[number];
+type Category = (typeof categoryEnum.enumValues)[number];
 function isCategory(v: unknown): v is Category {
   return typeof v === "string" && (categoryEnum.enumValues as readonly string[]).includes(v);
 }
@@ -34,9 +36,11 @@ export async function GET(req: Request) {
         eq(caughtItems.category, category)
       ));
 
-    return NextResponse.json({ ok: true, items: rows.map(r => r.itemName) });
+    return NextResponse.json({ ok: true, items: rows.map(r => r.itemName) }, {
+      headers: { "Cache-Control": "no-store" },
+    });
   } catch (e) {
-    console.error(e);
+    console.error("GET /api/caught error:", e);
     return NextResponse.json({ ok: false, error: "Internal error" }, { status: 500 });
   }
 }
