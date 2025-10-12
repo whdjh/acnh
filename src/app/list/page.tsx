@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import useQueryTab from "./hook/useQueryTab";
+import useQueryTab from "../../hook/useQueryTab";
+
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 // --- 타입들 ---
 interface HemisphereMonths { months_array: number[] } // 1~12
@@ -169,7 +183,7 @@ function formatTimesForMonth(item: Item, month: number, hemi: "north" | "south")
           const sh = to24(a), eh = to24(b);
           if (sh == null || eh == null) return seg;
           return sh > eh
-            ? `${String(sh).padStart(2, "0")}–다음날 ${String(eh).padStart(2, "0")}시`
+            ? `${String(sh).padStart(2, "0")}-${String(eh).padStart(2, "0")}시`
             : `${String(sh).padStart(2, "0")}–${String(eh).padStart(2, "0")}시`;
         }
         const hh = to24(seg);
@@ -197,7 +211,64 @@ function formatTimesForMonth(item: Item, month: number, hemi: "north" | "south")
   return "정보 없음";
 }
 
-// --- 컴포넌트 ---
+// --- 카드 컴포넌트 (선택: 가독성 위해 분리)
+function ListCardItem({
+  item,
+  isCaught,
+  timesText,
+  onToggle,
+}: {
+  item: Item;
+  isCaught: boolean;
+  timesText: string;
+  onToggle: (originalName: string) => void;
+}) {
+  return (
+    <Card
+      onClick={() => onToggle(item.originalName)}
+      className={[
+        "cursor-pointer transition",
+        isCaught
+          ? "bg-blue-500/90 border-blue-500 hover:bg-blue-500"
+          : "bg-card border-gray-200 hover:bg-white/50",
+      ].join(" ")}
+      title={item.originalName}
+    >
+      <CardContent className="pt-0">
+        <div className="w-full aspect-square">
+          <img
+            src={item.image_url}
+            alt={item.name}
+            className={["w-full h-full object-contain transition", isCaught ? "opacity-70" : ""].join(" ")}
+            loading="lazy"
+          />
+        </div>
+
+        <div className="mt-2 text-center">
+          <div className="text-sm font-medium">{item.name}</div>
+
+          {item.location && (
+            <div className="text-xs text-muted-foreground">{item.location}</div>
+          )}
+
+          {typeof item.sell_nook === "number" && (
+            <div className="text-xs text-muted-foreground/70">
+              {item.sell_nook.toLocaleString()} 벨
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      <CardFooter className="pt-0">
+        <div className="w-full text-center text-[11px] text-gray-700">
+          {timesText}
+        </div>
+      </CardFooter>
+    </Card>
+  );
+}
+
+// --- 페이지 컴포넌트 ---
 export default function ListPage() {
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
 
@@ -206,7 +277,7 @@ export default function ListPage() {
   const [caught, setCaught] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
-  // 사용자가 선택하는 월/시간
+  // 선택 월/시간
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
 
@@ -349,42 +420,59 @@ export default function ListPage() {
           </h1>
           <span className="text-sm">{hemi === "north" ? "북반구" : "남반구"}</span>
 
-          {/* 오른쪽 컨트롤 */}
+          {/* 오른쪽 컨트롤 (shadcn Select) */}
           <div className="flex items-center gap-3 ml-auto">
             {/* 월 선택 */}
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="border px-2 py-1 rounded"
-              >
+            <Select
+              value={String(selectedMonth)}
+              onValueChange={(v) => setSelectedMonth(parseInt(v, 10))}
+            >
+              <SelectTrigger className="min-w-[96px]">
+                <SelectValue placeholder="월" />
+              </SelectTrigger>
+              <SelectContent>
                 {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option value={m} key={m}>{m}월</option>
+                  <SelectItem key={m} value={String(m)}>
+                    {m}월
+                  </SelectItem>
                 ))}
-              </select>
+              </SelectContent>
+            </Select>
 
             {/* 시간 선택 */}
-              <select
-                value={selectedHour}
-                onChange={(e) => setSelectedHour(Number(e.target.value))}
-                className="border px-2 py-1 rounded"
-              >
+            <Select
+              value={String(selectedHour)}
+              onValueChange={(v) => setSelectedHour(parseInt(v, 10))}
+            >
+              <SelectTrigger className="min-w-[110px]">
+                <SelectValue placeholder="시간" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72">
                 {Array.from({ length: 24 }, (_, h) => h).map((h) => (
-                  <option key={h} value={h}>{String(h).padStart(2, "0")}시</option>
+                  <SelectItem key={h} value={String(h)}>
+                    {String(h).padStart(2, "0")}시
+                  </SelectItem>
                 ))}
-              </select>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
+        {/* 탭 (shadcn Button) */}
         <div className="flex gap-2 mt-3">
-          {CATEGORY_TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setTab(tab)}
-              className={`border px-3 py-1 rounded ${activeTab === tab ? "bg-blue-600 text-white" : "bg-white"}`}
-            >
-              {tab === "fish" ? "물고기" : tab === "bug" ? "곤충" : tab === "sea" ? "해양생물" : "화석"}
-            </button>
-          ))}
+          {CATEGORY_TABS.map((tab) => {
+            const active = activeTab === tab;
+            return (
+              <Button
+                key={tab}
+                variant={active ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTab(tab)}
+              >
+                {tab === "fish" ? "물고기" : tab === "bug" ? "곤충" : tab === "sea" ? "해양생물" : "화석"}
+              </Button>
+            );
+          })}
         </div>
       </header>
 
@@ -396,45 +484,17 @@ export default function ListPage() {
         </div>
       )}
 
+      {/* 카드 영역: shadcn Card 적용 */}
       <div className="grid grid-cols-3 gap-3">
-        {displayedItems.map((item) => {
-          const isCaught = caught.has(item.originalName);
-          const timesText = formatTimesForMonth(item, selectedMonth, hemi);
-
-          return (
-            <div
-              key={item.originalName}
-              onClick={() => toggleCatch(item.originalName)}
-              className={`border rounded p-2 cursor-pointer transition ${isCaught ? "bg-blue-500 border-blue-500" : "bg-white border-gray-200 hover:bg-white/10"
-                }`}
-              title={item.originalName}
-            >
-              <img
-                src={item.image_url}
-                alt={item.name}
-                className={`w-full aspect-square object-contain transition ${isCaught ? "opacity-70" : ""}`}
-                loading="lazy"
-              />
-              <div className="text-center text-sm font-medium mt-1">{item.name}</div>
-
-              {item.location && (
-                <div className="text-center text-xs text-gray-500">{item.location}</div>
-              )}
-              {typeof item.sell_nook === "number" && (
-                <div className="text-center text-xs text-gray-400">
-                  {item.sell_nook.toLocaleString()} 벨
-                </div>
-              )}
-
-              {/* 시간 요약 + 필터 기준 */}
-              <div className="mt-1 text-center">
-                <div className="text-[11px] text-gray-700">
-                  시간: {timesText}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {displayedItems.map((item) => (
+          <ListCardItem
+            key={item.originalName}
+            item={item}
+            isCaught={caught.has(item.originalName)}
+            timesText={formatTimesForMonth(item, selectedMonth, hemi)}
+            onToggle={toggleCatch}
+          />
+        ))}
       </div>
     </div>
   );
