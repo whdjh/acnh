@@ -36,24 +36,22 @@ export default function ListPage() {
   );
 }
 
-function ListPageInner() {
-  // 쿼리탭: ?tab=fish|bug|sea|fossil
-  const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
+// src/app/list/page.tsx (ListPageInner 안)
 
+function ListPageInner() {
+  const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
   const user = useLocalUser();
 
-  // 선택 월/시간
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
 
   const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
 
-  // /api/items 사용: 월이 0이면 전체를 가져옴
   const { items, loading: itemsLoading } = useAcnhItems({
     enabled: !!user,
     category: activeTab,
     hemisphere: hemi,
-    month: selectedMonth, // 0이면 훅이 전체 모드로 요청
+    month: selectedMonth, // 0이면 전체
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -63,24 +61,31 @@ function ListPageInner() {
   });
 
   const loading = itemsLoading || caughtLoading;
-
   const isAll = selectedMonth === 0;
 
-  const displayed = useMemo(() => {
-    // ✅ 전체 모드(0)면 시간/월 필터를 적용하지 않고 정렬만
-    const base = isAll
+  // 필터링 기준 목록(base): 전체모드면 그대로, 월/시 선택 모드면 가용시간 필터 적용
+  const base = useMemo(() => {
+    return isAll
       ? items
       : items.filter((it: Item) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
+  }, [items, selectedMonth, selectedHour, hemi, isAll]);
 
+  // 화면에 그릴 목록(정렬만 적용)
+  const displayed = useMemo(() => {
     return base
       .slice()
       .sort((a, b) => {
         const aCaught = caughtSet.has(a.originalName) ? 1 : 0;
         const bCaught = caughtSet.has(b.originalName) ? 1 : 0;
-        if (aCaught !== bCaught) return aCaught - bCaught;
+        if (aCaught !== bCaught) return aCaught - bCaught; // 미포획 먼저
         return a.name.localeCompare(b.name, "ko");
       });
-  }, [items, caughtSet, selectedMonth, selectedHour, hemi, isAll]);
+  }, [base, caughtSet]);
+
+  // ✅ 남은(미포획) 개수: 클릭(토글) 시 즉시 줄어듦
+  const remainingCount = useMemo(() => {
+    return base.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0);
+  }, [base, caughtSet]);
 
   if (!user) return null;
 
@@ -102,9 +107,9 @@ function ListPageInner() {
             selectedMonth={selectedMonth}
             onChangeMonth={setSelectedMonth}
             selectedHour={selectedHour}
-              onChangeHour={setSelectedHour}
-              counts={{ [activeTab]: displayed.length }}
-
+            onChangeHour={setSelectedHour}
+            // ✅ 현재 탭의 ‘미포획’ 개수 표시
+            counts={{ [activeTab]: remainingCount }}
           />
 
           {displayed.length === 0 ? (
@@ -115,9 +120,7 @@ function ListPageInner() {
             <ItemsGrid
               items={displayed}
               caughtSet={caughtSet}
-              timesFor={(it) =>
-                isAll ? "" : formatTimesForMonth(it, selectedMonth, hemi)
-              }
+              timesFor={(it) => (isAll ? "" : formatTimesForMonth(it, selectedMonth, hemi))}
               onToggleCatch={(name) => toggleCatch(name)}
             />
           )}
