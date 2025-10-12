@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import useQueryTab from "./hook/useQueryTab";
 
 interface Item {
-  name: string;
+  name: string;        // 한글 이름
+  originalName: string; // 영어 이름 (key용)
   image_url: string;
   location?: string;
   sell_nook?: number;
@@ -23,6 +24,7 @@ export default function ListPage() {
   const [caught, setCaught] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
+  // 유저 로드
   useEffect(() => {
     const u = localStorage.getItem("user");
     if (!u) {
@@ -41,14 +43,17 @@ export default function ListPage() {
       .then((r) => r.json())
       .then((data) => {
         if (data.ok) {
-          setItems(data.data);
+          const formatted = data.data.map((item: any) => ({
+            ...item,
+            originalName: item.originalName || item.name_en || item.name, // 영어 원본 이름
+          }));
+          setItems(formatted);
+
+          console.log(`${activeTab} 원본 데이터 ↓`);
           console.log(
-            `${activeTab} 원본 데이터 목록 ↓`
-          );
-          console.log(
-            data.data.map((item: any) => ({
-              name: item.name,
-              location: item.location
+            formatted.map((i: any) => ({
+              name: i.name,
+              location: i.location,
             }))
           );
         } else {
@@ -114,20 +119,18 @@ export default function ListPage() {
       <div className="grid grid-cols-3 gap-3">
         {items.map((item) => (
           <div
-            key={item.name}
-            onClick={() => toggleCatch(item.name)}
-            className={`border rounded p-2 cursor-pointer transition 
-    ${caught.has(item.name)
+            key={item.originalName} // 영어 원본 기준으로 key 고정
+            onClick={() => toggleCatch(item.originalName)}
+            className={`border rounded p-2 cursor-pointer transition ${caught.has(item.originalName)
                 ? "bg-blue-500 border-blue-500"
-                : "bg-white border-gray-200 hover:bg-white/10"}
-  `}
+                : "bg-white border-gray-200 hover:bg-white/10"
+              }`}
           >
             <img
               src={item.image_url}
               alt={item.name}
-              className={`w-full aspect-square object-contain transition
-      ${caught.has(item.name) ? "opacity-70" : ""}
-    `}
+              className={`w-full aspect-square object-contain transition ${caught.has(item.originalName) ? "opacity-70" : ""
+                }`}
             />
             <div className="text-center text-sm font-medium mt-1">
               {item.name}
