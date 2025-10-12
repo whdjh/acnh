@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Category, Item } from "@/types/acnh";
 
-/** 내부 전용: 응답이 JSON인지 보장 */
+type UseAcnhItemsOpts = {
+  enabled: boolean;
+  category: Category;
+  hemisphere: "north" | "south";
+  /** 월: 1~12, 전체는 0 */
+  month: number;
+};
+
 async function assertJson<T = any>(res: Response): Promise<T> {
   const ct = res.headers.get("content-type") || "";
   if (!ct.includes("application/json")) {
@@ -13,24 +20,16 @@ async function assertJson<T = any>(res: Response): Promise<T> {
   return res.json();
 }
 
-type UseNookipediaItemsOpts = {
-  enabled: boolean;
-  category: Category;
-  hemisphere: "north" | "south";
-  month: number;
-};
-
-export function useNookipediaItems({
+export function useAcnhItems({
   enabled,
   category,
   hemisphere,
   month,
-}: UseNookipediaItemsOpts) {
+}: UseAcnhItemsOpts) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 최신 요청만 반영하기 위한 키
   const reqKeyRef = useRef(0);
 
   const load = useCallback(async () => {
@@ -42,14 +41,19 @@ export function useNookipediaItems({
     const ac = new AbortController();
 
     try {
+      const isAll = month === 0;
       const params = new URLSearchParams({
-        month: String(month),
         hemi: hemisphere,
-        only: "1",
         _t: String(Date.now()),
       });
 
-      const res = await fetch(`/api/nookipedia/${category}?${params.toString()}`, {
+      // 월 모드(1~12)면 서버측 필터 사용, 전체(0)면 월 파라미터 생략
+      if (!isAll) {
+        params.set("month", String(month));
+        params.set("only", "1");
+      }
+
+      const res = await fetch(`/api/items/${category}?${params.toString()}`, {
         cache: "no-store",
         signal: ac.signal,
       });
@@ -62,12 +66,10 @@ export function useNookipediaItems({
         originalName: item.originalName || item.name_en || item.name,
       }));
 
-      if (reqKeyRef.current === myKey) {
-        setItems(formatted);
-      }
+      if (reqKeyRef.current === myKey) setItems(formatted);
     } catch (e: any) {
       if (e?.name !== "AbortError") {
-        console.error("GET /api/nookipedia failed:", e);
+        console.error("GET /api/items failed:", e);
         if (reqKeyRef.current === myKey) {
           setItems([]);
           setError(e?.message ?? "데이터를 불러오지 못했습니다.");
@@ -77,7 +79,6 @@ export function useNookipediaItems({
       if (reqKeyRef.current === myKey) setLoading(false);
     }
 
-    // 외부에서 cleanup 할 필요는 없지만 패턴상 반환
     return () => ac.abort();
   }, [enabled, category, hemisphere, month]);
 

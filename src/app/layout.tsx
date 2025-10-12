@@ -43,10 +43,6 @@ export const metadata: Metadata = {
   publisher: "모동숲 도감",
   alternates: {
     canonical: "/",
-    languages: {
-      "ko-KR": "/",
-      "en-US": "/en",
-    },
   },
   robots: {
     index: true,
@@ -127,7 +123,7 @@ export default function RootLayout({
         style={{ backgroundImage: "url('/background.jpg')" }}
       >
         {/* 어두운 오버레이(필요 시 투명도 조절) */}
-        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute inset-0" />
         <div className="relative z-10">{children}</div>
 
         {/* JSON-LD 구조화 데이터 */}

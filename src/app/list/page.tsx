@@ -1,14 +1,13 @@
-// app/list/page.tsx
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
 import useQueryTab from "@/hook/useQueryTab";
-import type { Category } from "@/types/acnh";
+import type { Category, Item } from "@/types/acnh";
 import { isAvailableAtHour, formatTimesForMonth } from "@/lib/time";
 
 import { useLocalUser } from "@/hook/useLocalUser";
 import { useCaughtItems } from "@/hook/useCaughtItems";
-import { useNookipediaItems } from "@/hook/useNookipediaItems";
+import { useAcnhItems } from "@/hook/useAcnhItems";
 
 import ListHeader from "@/components/list/ListHeader";
 import ItemsGrid from "@/components/list/ItemsGrid";
@@ -20,7 +19,6 @@ export const dynamic = "force-dynamic";
 
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
 
-// 로딩용 간단한 Fallback
 function ListPageFallback() {
   return (
     <div className="p-4">
@@ -31,7 +29,6 @@ function ListPageFallback() {
 }
 
 export default function ListPage() {
-  // useSearchParams()를 쓰는 훅/컴포넌트를 Suspense로 감싼다
   return (
     <Suspense fallback={<ListPageFallback />}>
       <ListPageInner />
@@ -40,7 +37,7 @@ export default function ListPage() {
 }
 
 function ListPageInner() {
-  // 여기서 useQueryTab(내부에서 useSearchParams 사용)을 호출해도 OK
+  // 쿼리탭: ?tab=fish|bug|sea|fossil
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
 
   const user = useLocalUser();
@@ -49,11 +46,14 @@ function ListPageInner() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
 
-  const { items, loading: itemsLoading } = useNookipediaItems({
+  const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
+
+  // /api/items 사용: 월이 0이면 전체를 가져옴
+  const { items, loading: itemsLoading } = useAcnhItems({
     enabled: !!user,
     category: activeTab,
-    hemisphere: user?.hemisphere === "south" ? "south" : "north",
-    month: selectedMonth,
+    hemisphere: hemi,
+    month: selectedMonth, // 0이면 훅이 전체 모드로 요청
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -62,14 +62,17 @@ function ListPageInner() {
     category: activeTab,
   });
 
-  const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
   const loading = itemsLoading || caughtLoading;
 
+  const isAll = selectedMonth === 0;
+
   const displayed = useMemo(() => {
-    const filtered = items.filter((it) =>
-      isAvailableAtHour(it, selectedMonth, selectedHour, hemi)
-    );
-    return filtered
+    // ✅ 전체 모드(0)면 시간/월 필터를 적용하지 않고 정렬만
+    const base = isAll
+      ? items
+      : items.filter((it: Item) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
+
+    return base
       .slice()
       .sort((a, b) => {
         const aCaught = caughtSet.has(a.originalName) ? 1 : 0;
@@ -77,7 +80,7 @@ function ListPageInner() {
         if (aCaught !== bCaught) return aCaught - bCaught;
         return a.name.localeCompare(b.name, "ko");
       });
-  }, [items, caughtSet, selectedMonth, selectedHour, hemi]);
+  }, [items, caughtSet, selectedMonth, selectedHour, hemi, isAll]);
 
   if (!user) return null;
 
@@ -99,7 +102,9 @@ function ListPageInner() {
             selectedMonth={selectedMonth}
             onChangeMonth={setSelectedMonth}
             selectedHour={selectedHour}
-            onChangeHour={setSelectedHour}
+              onChangeHour={setSelectedHour}
+              counts={{ [activeTab]: displayed.length }}
+
           />
 
           {displayed.length === 0 ? (
@@ -110,7 +115,9 @@ function ListPageInner() {
             <ItemsGrid
               items={displayed}
               caughtSet={caughtSet}
-              timesFor={(it) => formatTimesForMonth(it, selectedMonth, hemi)}
+              timesFor={(it) =>
+                isAll ? "" : formatTimesForMonth(it, selectedMonth, hemi)
+              }
               onToggleCatch={(name) => toggleCatch(name)}
             />
           )}
