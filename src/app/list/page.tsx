@@ -1,501 +1,106 @@
+// src/app/list/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import useQueryTab from "../../hook/useQueryTab";
+import { useMemo, useState } from "react";
+import useQueryTab from "@/hook/useQueryTab";
+import type { Category } from "@/types/acnh";
+import { isAvailableAtHour, formatTimesForMonth } from "@/lib/time";
 
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { useLocalUser } from "@/hook/useLocalUser";
+import { useCaughtItems } from "@/hook/useCaughtItems";
+import { useNookipediaItems } from "@/hook/useNookipediaItems";
 
-// --- 타입들 ---
-interface HemisphereMonths { months_array: number[] } // 1~12
-type Category = "fish" | "bug" | "sea" | "fossil";
+import ListHeader from "@/components/list/ListHeader";
+import ItemsGrid from "@/components/list/ItemsGrid";
+import ItemsGridSkeleton from "@/components/list/ItemsGridSkeleton";
+import ListHeaderSkeleton from "@/components/list/ListHeaderSkeleton";
 
-type TimesByMonthValue =
-  | string
-  | number[]
-  | boolean[]
-  | { start: string; end: string }[]
-  | null
-  | undefined;
-
-interface Item {
-  name: string;
-  originalName: string;
-  image_url: string;
-  location?: string;
-  sell_nook?: number;
-
-  north: HemisphereMonths;
-  south: HemisphereMonths;
-
-  times_by_month?: Record<string, TimesByMonthValue>;
-  north_times_by_month?: Record<string, TimesByMonthValue>;
-  south_times_by_month?: Record<string, TimesByMonthValue>;
-}
-
-// --- 상수 ---
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
 
-// --- 시간 파싱 유틸 ---
-function parseClockToHour(s: string): number | null {
-  const str = s.trim().toLowerCase();
-  if (str.includes("all")) return null;
-  const m = str.match(/^(\d{1,2})(?::(\d{1,2}))?\s*(am|pm)?$/i);
-  if (!m) return null;
-  let h = parseInt(m[1], 10);
-  const ampm = (m[3] || "").toLowerCase();
-  if (ampm === "am") { if (h === 12) h = 0; }
-  else if (ampm === "pm") { if (h !== 12) h += 12; }
-  return (h >= 0 && h <= 23) ? h : null;
-}
-
-function rangeToHours(startStr: string, endStr: string): number[] {
-  const sh = parseClockToHour(startStr);
-  const eh = parseClockToHour(endStr);
-  if (sh === null || eh === null) return [];
-  const hours: number[] = [];
-  if (sh <= eh) {
-    for (let h = sh; h <= eh; h++) hours.push(h);
-  } else {
-    for (let h = sh; h <= 23; h++) hours.push(h);
-    for (let h = 0; h <= eh; h++) hours.push(h);
-  }
-  return hours;
-}
-
-function stringTimesToHourSet(val: string): Set<number> {
-  const s = val.trim().toLowerCase();
-  if (!s || s.includes("all")) return new Set([...Array(24).keys()]);
-  const parts = s.split(/[,/&;]+/).map((p) => p.trim()).filter(Boolean);
-  const hours: number[] = [];
-  for (const part of parts) {
-    const mm = part.split(/-|–|—/).map((x) => x.trim());
-    if (mm.length === 2) hours.push(...rangeToHours(mm[0], mm[1]));
-    else {
-      const h = parseClockToHour(part);
-      if (h !== null) hours.push(h);
-    }
-  }
-  return new Set(hours);
-}
-
-function normalizeTimesToHourSet(val: TimesByMonthValue): Set<number> {
-  if (val == null) return new Set();
-  if (typeof val === "string") return stringTimesToHourSet(val);
-
-  if (Array.isArray(val)) {
-    if (val.length === 24 && typeof val[0] === "boolean") {
-      const hours: number[] = [];
-      (val as boolean[]).forEach((ok, h) => { if (ok) hours.push(h); });
-      return new Set(hours);
-    }
-    if (val.length > 0 && typeof val[0] === "number") {
-      return new Set(val as number[]);
-    }
-  }
-
-  if (Array.isArray(val) && typeof val[0] === "object" && val[0] != null) {
-    const hours: number[] = [];
-    for (const r of val as { start: string; end: string }[]) {
-      if (!r?.start || !r?.end) continue;
-      hours.push(...rangeToHours(r.start, r.end));
-    }
-    return new Set(hours);
-  }
-  return new Set();
-}
-
-function isAvailableAtHour(item: Item, month: number, hour: number, hemi: "north" | "south"): boolean {
-  const key = String(month);
-  const hemiTimes =
-    (hemi === "north" ? item.north_times_by_month?.[key] : item.south_times_by_month?.[key]);
-  const commonTimes = item.times_by_month?.[key];
-  const val = hemiTimes ?? commonTimes;
-  if (val == null) return false;
-  const hourSet = normalizeTimesToHourSet(val);
-  return hourSet.has(hour);
-}
-
-// --- 표시용 ---
-function compressHourList(hours: number[]): string {
-  const uniq = Array.from(new Set(hours)).sort((a, b) => a - b);
-  if (uniq.length === 24) return "종일";
-  if (uniq.length === 0) return "없음";
-
-  const ranges: Array<[number, number]> = [];
-  let s = uniq[0], prev = uniq[0];
-  for (let i = 1; i < uniq.length; i++) {
-    const h = uniq[i];
-    if (h === prev + 1) { prev = h; continue; }
-    ranges.push([s, prev]);
-    s = prev = h;
-  }
-  ranges.push([s, prev]);
-
-  return ranges
-    .map(([a, b]) => a === b
-      ? `${String(a).padStart(2, "0")}시`
-      : `${String(a).padStart(2, "0")}–${String(b).padStart(2, "0")}시`)
-    .join(", ");
-}
-
-function formatTimesForMonth(item: Item, month: number, hemi: "north" | "south"): string {
-  const key = String(month);
-  const val =
-    (hemi === "north" ? item.north_times_by_month?.[key] : item.south_times_by_month?.[key]) ??
-    item.times_by_month?.[key];
-
-  if (val == null) return "정보 없음";
-
-  if (typeof val === "string") {
-    const s = val.trim();
-    if (!s) return "정보 없음";
-    if (/all\s*day/i.test(s)) return "종일";
-
-    const segs = s
-      .toLowerCase()
-      .split(/[,/&;]+/)
-      .map((seg) => seg.trim())
-      .filter(Boolean)
-      .map((seg) => {
-        const [a, b] = seg.split(/-|–|—/).map((x) => x.trim());
-        const to24 = (t: string) => {
-          const m = t.match(/^(\d{1,2})(?::\d{1,2})?\s*(am|pm)?$/i);
-          if (!m) return null;
-          let h = parseInt(m[1], 10);
-          const ampm = (m[2] || "").toLowerCase();
-          if (ampm === "am") { if (h === 12) h = 0; }
-          else if (ampm === "pm") { if (h !== 12) h += 12; }
-          return (h >= 0 && h <= 23) ? h : null;
-        };
-        if (a && b) {
-          const sh = to24(a), eh = to24(b);
-          if (sh == null || eh == null) return seg;
-          return sh > eh
-            ? `${String(sh).padStart(2, "0")}-${String(eh).padStart(2, "0")}시`
-            : `${String(sh).padStart(2, "0")}–${String(eh).padStart(2, "0")}시`;
-        }
-        const hh = to24(seg);
-        return hh == null ? seg : `${String(hh).padStart(2, "0")}시`;
-      });
-
-    return segs.length ? segs.join(", ") : "정보 없음";
-  }
-
-  if (Array.isArray(val) && val.length === 24 && typeof val[0] === "boolean") {
-    const hours = (val as boolean[]).map((ok, h) => (ok ? h : null)).filter((h) => h !== null) as number[];
-    return compressHourList(hours);
-  }
-
-  if (Array.isArray(val) && val.length > 0 && typeof val[0] === "number") {
-    const hours = (val as number[]).filter((h) => h >= 0 && h <= 23);
-    return compressHourList(hours);
-  }
-
-  if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object") {
-    const parts = (val as Array<{ start: string; end: string }>).map(r => `${r.start}–${r.end}`);
-    return parts.length ? parts.join(", ") : "정보 없음";
-  }
-
-  return "정보 없음";
-}
-
-// --- 카드 컴포넌트 (선택: 가독성 위해 분리)
-function ListCardItem({
-  item,
-  isCaught,
-  timesText,
-  onToggle,
-}: {
-  item: Item;
-  isCaught: boolean;
-  timesText: string;
-  onToggle: (originalName: string) => void;
-}) {
+// 페이지 안에서만 쓰는 간단한 빈 상태
+function EmptyState({ text }: { text: string }) {
   return (
-    <Card
-      onClick={() => onToggle(item.originalName)}
-      className={[
-        "cursor-pointer transition",
-        isCaught
-          ? "bg-blue-500/90 border-blue-500 hover:bg-blue-500"
-          : "bg-card border-gray-200 hover:bg-white/50",
-      ].join(" ")}
-      title={item.originalName}
-    >
-      <CardContent className="pt-0">
-        <div className="w-full aspect-square">
-          <img
-            src={item.image_url}
-            alt={item.name}
-            className={["w-full h-full object-contain transition", isCaught ? "opacity-70" : ""].join(" ")}
-            loading="lazy"
-          />
-        </div>
-
-        <div className="mt-2 text-center">
-          <div className="text-sm font-medium">{item.name}</div>
-
-          {item.location && (
-            <div className="text-xs text-muted-foreground">{item.location}</div>
-          )}
-
-          {typeof item.sell_nook === "number" && (
-            <div className="text-xs text-muted-foreground/70">
-              {item.sell_nook.toLocaleString()} 벨
-            </div>
-          )}
-        </div>
-      </CardContent>
-
-      <CardFooter className="pt-0">
-        <div className="w-full text-center text-[11px] text-gray-700">
-          {timesText}
-        </div>
-      </CardFooter>
-    </Card>
+    <div className="text-sm text-muted-foreground py-12 text-center">
+      {text}
+    </div>
   );
 }
 
-// --- 페이지 컴포넌트 ---
 export default function ListPage() {
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
+  const user = useLocalUser();
 
-  const [user, setUser] = useState<any>(null);
-  const [items, setItems] = useState<Item[]>([]);
-  const [caught, setCaught] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
-
-  // 선택 월/시간
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
 
-  // user 로드
-  useEffect(() => {
-    const u = localStorage.getItem("user");
-    if (!u) { window.location.href = "/"; return; }
-    setUser(JSON.parse(u));
-  }, []);
+  const { items, loading: itemsLoading } = useNookipediaItems({
+    enabled: !!user,
+    category: activeTab,
+    hemisphere: user?.hemisphere === "south" ? "south" : "north",
+    month: selectedMonth,
+  });
 
-  // 잡은 목록 GET
-  useEffect(() => {
-    if (!user) return;
-    const uid = Number(user.id);
-    if (!Number.isFinite(uid)) return;
+  const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
+    enabled: !!user,
+    userId: user?.id,
+    category: activeTab,
+  });
 
-    const params = new URLSearchParams({
-      userId: String(uid),
-      category: activeTab,
-      _t: String(Date.now()),
-    });
+  const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
+  const loading = itemsLoading || caughtLoading;
 
-    fetch(`/api/caught?${params.toString()}`, { cache: "no-store" })
-      .then(async (res) => {
-        const ct = res.headers.get("content-type") || "";
-        if (!ct.includes("application/json")) throw new Error("Expected JSON");
-        return res.json();
-      })
-      .then((data) => setCaught(new Set<string>(data.items ?? [])))
-      .catch((e) => {
-        console.error("GET /api/caught failed:", e);
-        setCaught(new Set());
+  const displayed = useMemo(() => {
+    const filtered = items.filter((it) =>
+      isAvailableAtHour(it, selectedMonth, selectedHour, hemi)
+    );
+    return filtered
+      .slice()
+      .sort((a, b) => {
+        const aCaught = caughtSet.has(a.originalName) ? 1 : 0;
+        const bCaught = caughtSet.has(b.originalName) ? 1 : 0;
+        if (aCaught !== bCaught) return aCaught - bCaught;
+        return a.name.localeCompare(b.name, "ko");
       });
-  }, [user, activeTab]);
-
-  // 월/탭에 맞는 아이템 목록 GET
-  useEffect(() => {
-    if (!user) return;
-    setLoading(true);
-
-    const params = new URLSearchParams({
-      month: String(selectedMonth),
-      hemi: user.hemisphere === "south" ? "south" : "north",
-      only: "1",
-      _t: String(Date.now()),
-    });
-
-    fetch(`/api/nookipedia/${activeTab}?${params.toString()}`, { cache: "no-store" })
-      .then(async (res) => {
-        const ct = res.headers.get("content-type") || "";
-        if (!ct.includes("application/json")) throw new Error("Expected JSON");
-        return res.json();
-      })
-      .then((data) => {
-        if (data.ok) {
-          const formatted: Item[] = data.data.map((item: any) => ({
-            ...item,
-            originalName: item.originalName || item.name_en || item.name,
-          }));
-          setItems(formatted);
-        } else {
-          alert(`데이터 불러오기 실패: ${data.error}`);
-        }
-      })
-      .catch(() => alert("데이터를 불러오지 못했습니다."))
-      .finally(() => setLoading(false));
-  }, [activeTab, user, selectedMonth]);
-
-  // 토글 (낙관적 업데이트 + 실패 롤백)
-  async function toggleCatch(itemName: string) {
-    if (!user) return;
-    const uid = Number(user.id);
-    if (!Number.isFinite(uid)) return;
-
-    const optimistic = new Set(caught);
-    const wasCaught = optimistic.has(itemName);
-    if (wasCaught) optimistic.delete(itemName);
-    else optimistic.add(itemName);
-    setCaught(optimistic);
-
-    try {
-      const res = await fetch("/api/caught/toggle", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        cache: "no-store",
-        body: JSON.stringify({
-          userId: uid,
-          category: activeTab,
-          itemName,
-          _t: Date.now(),
-        }),
-      });
-      const ct = res.headers.get("content-type") || "";
-      if (!ct.includes("application/json")) throw new Error("Expected JSON");
-      const data = await res.json();
-      setCaught((prev) => {
-        const next = new Set(prev);
-        if (data.caught) next.add(itemName);
-        else next.delete(itemName);
-        return next;
-      });
-    } catch (e) {
-      console.error("POST /api/caught/toggle failed:", e);
-      setCaught((prev) => {
-        const next = new Set(prev);
-        if (wasCaught) next.add(itemName);
-        else next.delete(itemName);
-        return next;
-      });
-      alert("상태 변경에 실패했습니다.");
-    }
-  }
-
-  // 필터/정렬
-  const hemi: "north" | "south" = (user?.hemisphere === "south" ? "south" : "north");
-
-  const displayedItems = useMemo(() => {
-    const base = items.filter((it) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
-    const list = [...base];
-    list.sort((a, b) => {
-      const aCaught = caught.has(a.originalName) ? 1 : 0;
-      const bCaught = caught.has(b.originalName) ? 1 : 0;
-      if (aCaught !== bCaught) return aCaught - bCaught;
-      return a.name.localeCompare(b.name, "ko");
-    });
-    return list;
-  }, [items, caught, selectedHour, hemi, selectedMonth]);
+  }, [items, caughtSet, selectedMonth, selectedHour, hemi]);
 
   if (!user) return null;
 
   return (
     <div className="p-4">
-      <header className="mb-4">
-        <div className="flex flex-wrap items-center gap-4 mb-2">
-          <h1 className="text-xl font-bold">
-            {user.username}님의{" "}
-            {activeTab === "fish" ? "물고기" :
-              activeTab === "bug" ? "곤충" :
-                activeTab === "sea" ? "해양생물" : "화석"} 도감
-          </h1>
-          <span className="text-sm">{hemi === "north" ? "북반구" : "남반구"}</span>
-
-          {/* 오른쪽 컨트롤 (shadcn Select) */}
-          <div className="flex items-center gap-3 ml-auto">
-            {/* 월 선택 */}
-            <Select
-              value={String(selectedMonth)}
-              onValueChange={(v) => setSelectedMonth(parseInt(v, 10))}
-            >
-              <SelectTrigger className="min-w-[96px]">
-                <SelectValue placeholder="월" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <SelectItem key={m} value={String(m)}>
-                    {m}월
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* 시간 선택 */}
-            <Select
-              value={String(selectedHour)}
-              onValueChange={(v) => setSelectedHour(parseInt(v, 10))}
-            >
-              <SelectTrigger className="min-w-[110px]">
-                <SelectValue placeholder="시간" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72">
-                {Array.from({ length: 24 }, (_, h) => h).map((h) => (
-                  <SelectItem key={h} value={String(h)}>
-                    {String(h).padStart(2, "0")}시
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* 탭 (shadcn Button) */}
-        <div className="flex gap-2 mt-3">
-          {CATEGORY_TABS.map((tab) => {
-            const active = activeTab === tab;
-            return (
-              <Button
-                key={tab}
-                variant={active ? "default" : "outline"}
-                size="sm"
-                onClick={() => setTab(tab)}
-              >
-                {tab === "fish" ? "물고기" : tab === "bug" ? "곤충" : tab === "sea" ? "해양생물" : "화석"}
-              </Button>
-            );
-          })}
-        </div>
-      </header>
-
-      {loading && <p className="text-sm text-gray-500">불러오는 중...</p>}
-
-      {!loading && displayedItems.length === 0 && (
-        <div className="text-sm text-gray-500 py-12 text-center">
-          해당 조건에 맞는 항목이 없습니다.
-        </div>
-      )}
-
-      {/* 카드 영역: shadcn Card 적용 */}
-      <div className="grid grid-cols-3 gap-3">
-        {displayedItems.map((item) => (
-          <ListCardItem
-            key={item.originalName}
-            item={item}
-            isCaught={caught.has(item.originalName)}
-            timesText={formatTimesForMonth(item, selectedMonth, hemi)}
-            onToggle={toggleCatch}
+      {loading ? (
+        <>
+          <ListHeaderSkeleton />
+          <ItemsGridSkeleton count={9} />
+        </>
+      ) : (
+        <>
+          <ListHeader
+            username={user.username}
+            hemisphere={hemi}
+            tabs={CATEGORY_TABS}
+            activeTab={activeTab}
+            onChangeTab={setTab}
+            selectedMonth={selectedMonth}
+            onChangeMonth={setSelectedMonth}
+            selectedHour={selectedHour}
+            onChangeHour={setSelectedHour}
           />
-        ))}
-      </div>
+
+          {displayed.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-12 text-center">
+              해당 조건에 맞는 항목이 없습니다.
+            </div>
+
+          ) : (
+            <ItemsGrid
+              items={displayed}
+              caughtSet={caughtSet}
+              timesFor={(it) => formatTimesForMonth(it, selectedMonth, hemi)}
+              onToggleCatch={(name) => toggleCatch(name)}
+            />
+          )}
+        </>
+      )}
     </div>
   );
 }
