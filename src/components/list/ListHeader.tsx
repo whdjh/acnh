@@ -8,7 +8,24 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { X } from "lucide-react";
 import type { Category } from "@/types/acnh";
+
+interface ListHeaderProps {
+  username: string;
+  hemisphere: "north" | "south";
+  tabs: Category[];
+  activeTab: Category;
+  onChangeTab: (t: Category) => void;
+  selectedMonth: number;
+  onChangeMonth: (m: number) => void;
+  selectedHour: number;
+  onChangeHour: (h: number) => void;
+  counts?: Partial<Record<Category, number>>;
+  searchTerm: string;
+  onChangeSearch: (v: string) => void;
+}
 
 export default function ListHeader({
   username,
@@ -21,21 +38,12 @@ export default function ListHeader({
   selectedHour,
   onChangeHour,
   counts,
-}: {
-  username: string;
-  hemisphere: "north" | "south";
-  tabs: Category[];
-  activeTab: Category;
-  onChangeTab: (t: Category) => void;
-  selectedMonth: number;
-  onChangeMonth: (m: number) => void;
-  selectedHour: number;
-  onChangeHour: (h: number) => void;
-  counts?: Partial<Record<Category, number>>;
-}) {
+  searchTerm,
+  onChangeSearch,
+}: ListHeaderProps) {
   return (
     <header className="mb-4">
-      <div className="flex flex-wrap items-center gap-4 mb-2">
+      <div className="flex flex-wrap items-center gap-3 mb-2">
         <h1 className="text-xl font-bold">
           {username}님의{" "}
           {activeTab === "fish"
@@ -48,18 +56,39 @@ export default function ListHeader({
           도감
         </h1>
 
-        <span className="text-sm font-semibold">
+        {/* 공간 아끼기: 작은 화면에선 반구 라벨 숨김 */}
+        <span className="text-sm font-semibold hidden sm:inline">
           {hemisphere === "north" ? "북반구" : "남반구"}
         </span>
 
-        {/* 오른쪽 컨트롤: 월/시간 */}
-        <div className="flex items-center gap-3 ml-auto">
-          {/* 월 선택 (0 = 전체) */}
+        {/* 오른쪽 컨트롤: 검색 / 월 / 시간 */}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {/* 더 작은 검색 인풋 */}
+          <div className="relative w-[150px] sm:w-[200px] md:w-[240px]">
+            <Input
+              value={searchTerm}
+              onChange={(e) => onChangeSearch(e.target.value)}
+              placeholder="이름으로 검색…"
+              className="h-8 text-sm pr-8"
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onClick={() => onChangeSearch("")}
+                aria-label="검색어 지우기"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* 월 선택: 높이/폰트 축소 + 최소너비 축소 */}
           <Select
             value={String(selectedMonth)}
             onValueChange={(v) => onChangeMonth(parseInt(v, 10))}
           >
-            <SelectTrigger className="min-w-[110px]" aria-label="월 선택">
+            <SelectTrigger className="h-8 text-sm min-w-[88px]" aria-label="월 선택">
               <SelectValue placeholder="월" />
             </SelectTrigger>
             <SelectContent>
@@ -72,12 +101,12 @@ export default function ListHeader({
             </SelectContent>
           </Select>
 
-          {/* 시간 선택 */}
+          {/* 시간 선택: 높이/폰트 축소 + 최소너비 축소 */}
           <Select
             value={String(selectedHour)}
             onValueChange={(v) => onChangeHour(parseInt(v, 10))}
           >
-            <SelectTrigger className="min-w-[110px]" aria-label="시간 선택">
+            <SelectTrigger className="h-8 text-sm min-w-[88px]" aria-label="시간 선택">
               <SelectValue placeholder="시간" />
             </SelectTrigger>
             <SelectContent className="max-h-72">
@@ -92,7 +121,7 @@ export default function ListHeader({
       </div>
 
       {/* 탭 버튼 + 개수 뱃지 */}
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 mt-3 flex-wrap">
         {tabs.map((tab) => {
           const selected = activeTab === tab;
           const label =

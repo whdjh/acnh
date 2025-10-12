@@ -14,7 +14,7 @@ import ItemsGrid from "@/components/list/ItemsGrid";
 import ItemsGridSkeleton from "@/components/list/ItemsGridSkeleton";
 import ListHeaderSkeleton from "@/components/list/ListHeaderSkeleton";
 
-// 이 페이지는 동적으로 렌더링 (프리렌더 에러 회피)
+// 동적 렌더링 (프리렌더 에러 회피)
 export const dynamic = "force-dynamic";
 
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
@@ -36,14 +36,13 @@ export default function ListPage() {
   );
 }
 
-// src/app/list/page.tsx (ListPageInner 안)
-
 function ListPageInner() {
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
   const user = useLocalUser();
 
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
+  const [search, setSearch] = useState<string>("");
 
   const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
 
@@ -63,29 +62,42 @@ function ListPageInner() {
   const loading = itemsLoading || caughtLoading;
   const isAll = selectedMonth === 0;
 
-  // 필터링 기준 목록(base): 전체모드면 그대로, 월/시 선택 모드면 가용시간 필터 적용
+  // 월/시간 필터
   const base = useMemo(() => {
     return isAll
       ? items
       : items.filter((it: Item) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
   }, [items, selectedMonth, selectedHour, hemi, isAll]);
 
-  // 화면에 그릴 목록(정렬만 적용)
+  // ✅ 이름만 검색
+  const matchesQuery = (it: Item, q: string) => {
+    if (!q) return true;
+    const needle = q.trim().toLocaleLowerCase("ko-KR");
+    const hay = [it.name, it.originalName].join(" ").toLocaleLowerCase("ko-KR");
+    return hay.includes(needle);
+  };
+
+  const filtered = useMemo(() => {
+    if (!base) return [];
+    return base.filter((it: Item) => matchesQuery(it, search));
+  }, [base, search]);
+
+  // 정렬: 미포획 먼저 → 이름 오름차순(한글)
   const displayed = useMemo(() => {
-    return base
+    return filtered
       .slice()
       .sort((a, b) => {
         const aCaught = caughtSet.has(a.originalName) ? 1 : 0;
         const bCaught = caughtSet.has(b.originalName) ? 1 : 0;
-        if (aCaught !== bCaught) return aCaught - bCaught; // 미포획 먼저
+        if (aCaught !== bCaught) return aCaught - bCaught;
         return a.name.localeCompare(b.name, "ko");
       });
-  }, [base, caughtSet]);
+  }, [filtered, caughtSet]);
 
-  // ✅ 남은(미포획) 개수: 클릭(토글) 시 즉시 줄어듦
+  // 남은(미포획) 개수: 검색 결과 기준
   const remainingCount = useMemo(() => {
-    return base.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0);
-  }, [base, caughtSet]);
+    return filtered.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0);
+  }, [filtered, caughtSet]);
 
   if (!user) return null;
 
@@ -108,8 +120,10 @@ function ListPageInner() {
             onChangeMonth={setSelectedMonth}
             selectedHour={selectedHour}
             onChangeHour={setSelectedHour}
-            // ✅ 현재 탭의 ‘미포획’ 개수 표시
             counts={{ [activeTab]: remainingCount }}
+            // 검색 props
+            searchTerm={search}
+            onChangeSearch={setSearch}
           />
 
           {displayed.length === 0 ? (
