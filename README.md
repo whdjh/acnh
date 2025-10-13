@@ -37,13 +37,13 @@
 ---
 
 ## 3 스크린샷
-> ※ 직접 촬영한 이미지를 아래 자리에 넣어 주세요.
-
 - 홈(로그인/회원가입) 화면
 <img width="388" height="770" alt="스크린샷 2025-10-14 오전 2 47 03" src="https://github.com/user-attachments/assets/9d111244-acb0-4fbb-952b-92f5a8f06f80" />
 <img width="391" height="771" alt="스크린샷 2025-10-14 오전 2 47 17" src="https://github.com/user-attachments/assets/d2163343-c7bf-4916-bd75-aa3e2f7e7eef" />
+
 - 리스트 필터 예시(월/시간대)
 <img width="390" height="103" alt="스크린샷 2025-10-14 오전 2 48 15" src="https://github.com/user-attachments/assets/7bfe8e33-e578-45de-9c7c-e8903e54ac08" />
+
 - 잡은 항목 정리 & 남은 개수 표시
 <img width="384" height="843" alt="스크린샷 2025-10-14 오전 2 49 03" src="https://github.com/user-attachments/assets/d5d87edd-e85d-4e95-8e55-32592b188985" />
 
