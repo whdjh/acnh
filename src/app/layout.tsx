@@ -44,6 +44,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://acnh-gules.vercel.app",
   },
+  metadataBase: new URL("https://acnh-gules.vercel.app"),
+  verification: {
+    google: "7W8K5jynjR_b8gTwxRgXVv2AtuGKcecspbj75-ftjgc",
+  },
 };
 
 
