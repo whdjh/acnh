@@ -1,4 +1,3 @@
-// app/brand/tamsldogam/page.tsx
 import type { Metadata } from "next";
 
 const BASE = "https://acnh-gules.vercel.app";
