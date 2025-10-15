@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "../styles/globals.css";
 
 export const metadata: Metadata = {
   title: "탐슬도감",
   description:
     "모여봐요 동물의 숲 도감 웹앱 — 이름·월·시간·반구 한 번에 필터, 잡은 항목 정리, 모바일 최적화.",
-  icons: {
-    icon: "/favicon.ico",
-  },
+  icons: { icon: "/favicon.ico" },
   openGraph: {
     title: "탐슬도감",
     description:
@@ -35,31 +34,45 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-    },
+    googleBot: { index: true, follow: true, "max-video-preview": -1 },
   },
-  alternates: {
-    canonical: "https://acnh-gules.vercel.app",
-  },
+  alternates: { canonical: "https://acnh-gules.vercel.app" },
   metadataBase: new URL("https://acnh-gules.vercel.app"),
   verification: {
     google: "7W8K5jynjR_b8gTwxRgXVv2AtuGKcecspbj75-ftjgc",
   },
 };
 
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ko">
+      <head>
+        <Script id="gtm-head" strategy="beforeInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','GTM-KPHJDQX5');
+          `}
+        </Script>
+      </head>
+
       <body
         className="min-h-screen bg-cover bg-center bg-fixed relative"
         style={{ backgroundImage: "url('/background.jpg')" }}
       >
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-KPHJDQX5"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          ></iframe>
+        </noscript>
+
         {/* 어두운 오버레이(필요 시 투명도 조절) */}
         <div className="absolute inset-0" />
         <div className="relative z-10">{children}</div>
