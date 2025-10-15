@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import "../styles/globals.css";
+import GtmRouteListener from "./_gtm-route-listener";
 
 export const metadata: Metadata = {
   title: "탐슬도감",
@@ -49,6 +50,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        {/* Google Tag Manager - head 상단 */}
         <Script id="gtm-head" strategy="beforeInteractive">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -64,16 +66,19 @@ export default function RootLayout({
         className="min-h-screen bg-cover bg-center bg-fixed relative"
         style={{ backgroundImage: "url('/background.jpg')" }}
       >
+        {/* Google Tag Manager (noscript) - body 바로 아래 */}
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-KPHJDQX5"
             height="0"
             width="0"
             style={{ display: "none", visibility: "hidden" }}
-          ></iframe>
+          />
         </noscript>
 
-        {/* 어두운 오버레이(필요 시 투명도 조절) */}
+        {/* SPA 라우트 전환 시 가상 페이지뷰 이벤트 푸시 */}
+        <GtmRouteListener />
+
         <div className="absolute inset-0" />
         <div className="relative z-10">{children}</div>
       </body>
