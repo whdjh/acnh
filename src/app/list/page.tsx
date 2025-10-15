@@ -36,6 +36,9 @@ export default function ListPage() {
   );
 }
 
+// 가격 정렬 키. 기본값을 '가격 높은 순'으로 설정한다.
+type SortKey = "priceDesc" | "priceAsc";
+
 function ListPageInner() {
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
   const user = useLocalUser();
@@ -43,6 +46,7 @@ function ListPageInner() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [search, setSearch] = useState<string>("");
+  const [sort, setSort] = useState<SortKey>("priceDesc"); // 가격 높은 순을 기본으로
 
   const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
 
@@ -69,7 +73,7 @@ function ListPageInner() {
       : items.filter((it: Item) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
   }, [items, selectedMonth, selectedHour, hemi, isAll]);
 
-  // ✅ 이름만 검색
+  // 이름만 검색
   const matchesQuery = (it: Item, q: string) => {
     if (!q) return true;
     const needle = q.trim().toLocaleLowerCase("ko-KR");
@@ -82,17 +86,42 @@ function ListPageInner() {
     return base.filter((it: Item) => matchesQuery(it, search));
   }, [base, search]);
 
-  // 정렬: 미포획 먼저 → 이름 오름차순(한글)
+  // 정렬: 미포획 먼저, 포획은 아래로 고정한다.
+  // 각 그룹 내부에서만 가격 정렬을 적용한다.
+  // - priceDesc: 가격 높은 순
+  // - priceAsc: 가격 낮은 순
+  // 가격이 없는 항목은 각 그룹의 맨 뒤로 보낸다. 동가에는 이름 오름차순을 사용한다.
   const displayed = useMemo(() => {
-    return filtered
-      .slice()
-      .sort((a, b) => {
-        const aCaught = caughtSet.has(a.originalName) ? 1 : 0;
-        const bCaught = caughtSet.has(b.originalName) ? 1 : 0;
-        if (aCaught !== bCaught) return aCaught - bCaught;
-        return a.name.localeCompare(b.name, "ko");
-      });
-  }, [filtered, caughtSet]);
+    const nameAsc = (a: Item, b: Item) => a.name.localeCompare(b.name, "ko");
+    const price = (x: Item) => (typeof x.sell_nook === "number" ? x.sell_nook : null);
+
+    const arr = filtered.slice();
+
+    return arr.sort((a, b) => {
+      const aGroup = caughtSet.has(a.originalName) ? 1 : 0; // 0: 미포획, 1: 포획
+      const bGroup = caughtSet.has(b.originalName) ? 1 : 0;
+
+      // 그룹 우선: 미포획(0)이 먼저, 포획(1)이 나중
+      if (aGroup !== bGroup) return aGroup - bGroup;
+
+      // 같은 그룹 안에서는 가격 정렬
+      const pa = price(a);
+      const pb = price(b);
+
+      // 가격 미존재는 같은 그룹의 맨 뒤
+      if (pa == null && pb == null) return nameAsc(a, b);
+      if (pa == null) return 1;
+      if (pb == null) return -1;
+
+      if (sort === "priceAsc") {
+        if (pa !== pb) return pa - pb;
+        return nameAsc(a, b);
+      } else {
+        if (pa !== pb) return pb - pa;
+        return nameAsc(a, b);
+      }
+    });
+  }, [filtered, caughtSet, sort]);
 
   // 남은(미포획) 개수: 검색 결과 기준
   const remainingCount = useMemo(() => {
@@ -124,6 +153,9 @@ function ListPageInner() {
             // 검색 props
             searchTerm={search}
             onChangeSearch={setSearch}
+            // 정렬 드롭다운 props
+            sort={sort}
+            onChangeSort={setSort}
           />
 
           {displayed.length === 0 ? (
