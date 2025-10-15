@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Suspense } from "react";
 import "../styles/globals.css";
 import GtmRouteListener from "./_gtm-route-listener";
 
@@ -77,7 +78,9 @@ export default function RootLayout({
         </noscript>
 
         {/* SPA 라우트 전환 시 가상 페이지뷰 이벤트 푸시 */}
-        <GtmRouteListener />
+        <Suspense fallback={null}>
+          <GtmRouteListener />
+        </Suspense>
 
         <div className="absolute inset-0" />
         <div className="relative z-10">{children}</div>
