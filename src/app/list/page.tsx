@@ -97,7 +97,7 @@ function ListPageInner() {
     if (s.includes("clifftop") || s.includes("절벽")) return "clifftop";
 
     // 강(하구)
-    if (s.includes("mouth") || s.includes("하구")) return "riverMouth";
+    if (s.includes("mouth") || s.includes("강 하구")) return "riverMouth";
 
     // 바다
     if (s.includes("sea") || s.includes("ocean") || s.includes("beach") || s.includes("바다"))

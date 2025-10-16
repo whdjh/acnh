@@ -1,4 +1,3 @@
-// src/components/list/ItemsGridSkeleton.tsx
 "use client";
 
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
