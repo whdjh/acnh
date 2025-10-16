@@ -37,6 +37,7 @@ export const acnhItems = pgTable("acnh_items", {
   raw: jsonb("raw"),
   dataVersion: varchar("data_version", { length: 80 }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  shadowSize: varchar("shadow_size", { length: 120 }).notNull(),
 }, (t) => [
   uniqueIndex("uniq_cat_name").on(t.category, t.originalName),
 ]);
