@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import type { Category } from "@/types/acnh";
+import type { Habitat } from "@/app/list/page";
 
 interface ListHeaderProps {
   username: string;
@@ -25,9 +26,12 @@ interface ListHeaderProps {
   counts?: Partial<Record<Category, number>>;
   searchTerm: string;
   onChangeSearch: (v: string) => void;
-  // 정렬 드롭다운 제어 프로퍼티
   sort: "priceDesc" | "priceAsc";
   onChangeSort: (v: "priceDesc" | "priceAsc") => void;
+
+  // 물고기 전용 서식지 제어
+  habitat: Habitat;
+  onChangeHabitat: (v: Habitat) => void;
 }
 
 export default function ListHeader({
@@ -45,6 +49,8 @@ export default function ListHeader({
   onChangeSearch,
   sort,
   onChangeSort,
+  habitat,
+  onChangeHabitat,
 }: ListHeaderProps) {
   return (
     <header className="mb-4">
@@ -60,17 +66,14 @@ export default function ListHeader({
                 ? "해양생물"
                 : "화석"}{" "}
           도감
-          {/* 공간 아끼기: 작은 화면에선 반구 라벨 숨김 */}
-          {/* 현재는 항상 보이도록 수정했다. 필요시 다시 숨김 클래스를 추가할 수 있다. */}
           <span className="text-xs font-semibold inline">
             {hemisphere === "north" ? "북반구" : "남반구"}
           </span>
         </h1>
       </div>
 
-      {/* 두 번째 줄: 이름 검색 전용 라인 */}
+      {/* 두 번째 줄: 이름 검색 전용 */}
       <div className="mb-2">
-        {/* 더 작은 검색 인풋 */}
         <div className="relative w-full sm:w-[420px] md:w-[520px]">
           <Input
             value={searchTerm}
@@ -91,9 +94,9 @@ export default function ListHeader({
         </div>
       </div>
 
-      {/* 세 번째 줄: 드롭다운들(월/시간/정렬) 한 줄 */}
+      {/* 세 번째 줄: 월/시간/정렬 */}
       <div className="flex flex-wrap items-center gap-2 mb-2">
-        {/* 월 선택: 높이/폰트 축소 + 최소너비 축소 */}
+        {/* 월 */}
         <Select
           value={String(selectedMonth)}
           onValueChange={(v) => onChangeMonth(parseInt(v, 10))}
@@ -111,7 +114,7 @@ export default function ListHeader({
           </SelectContent>
         </Select>
 
-        {/* 시간 선택: 높이/폰트 축소 + 최소너비 축소 */}
+        {/* 시간 */}
         <Select
           value={String(selectedHour)}
           onValueChange={(v) => onChangeHour(parseInt(v, 10))}
@@ -128,7 +131,7 @@ export default function ListHeader({
           </SelectContent>
         </Select>
 
-        {/* 정렬 드롭다운: 그룹 고정 유지 상태에서 그룹 내부만 가격 정렬한다. */}
+        {/* 정렬 */}
         <Select value={sort} onValueChange={(v) => onChangeSort(v as "priceDesc" | "priceAsc")}>
           <SelectTrigger className="h-8 text-sm min-w-[132px]" aria-label="정렬">
             <SelectValue placeholder="정렬" />
@@ -140,8 +143,8 @@ export default function ListHeader({
         </Select>
       </div>
 
-      {/* 탭 버튼 + 개수 뱃지 */}
-      <div className="flex gap-2 mt-3 flex-wrap">
+      {/* 네 번째 줄: 상단 탭(물고기/곤충/해양생물/화석) */}
+      <div className="flex gap-2 flex-wrap">
         {tabs.map((tab) => {
           const selected = activeTab === tab;
           const label =
@@ -170,6 +173,33 @@ export default function ListHeader({
           );
         })}
       </div>
+
+      {/* 마지막 줄: 물고기 전용 서식지 토글 – 6분류(연못/강/절벽/하구/부두/바다) */}
+      {activeTab === "fish" && (
+        <div className="flex flex-wrap mt-3 items-center gap-2 mb-2">
+          {[
+            { key: "all", label: "전체" },
+            { key: "pond", label: "연못" },
+            { key: "river", label: "강" },
+            { key: "clifftop", label: "강(절벽 위)" },
+            { key: "riverMouth", label: "강(하구)" },
+            { key: "pier", label: "부두" },
+            { key: "sea", label: "바다" },
+          ].map(({ key, label }) => {
+            const selected = habitat === (key as Habitat);
+            return (
+              <Button
+                key={key}
+                variant={selected ? "default" : "outline"}
+                size="sm"
+                onClick={() => onChangeHabitat(key as Habitat)}
+              >
+                {label}
+              </Button>
+            );
+          })}
+        </div>
+      )}
     </header>
   );
 }

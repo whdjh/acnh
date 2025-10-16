@@ -19,6 +19,25 @@ export const dynamic = "force-dynamic";
 
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
 
+// 가격 정렬 키
+type SortKey = "priceDesc" | "priceAsc";
+
+// 서식지(물고기 전용)
+// - pond(연못)
+// - river(강 일반)
+// - clifftop(절벽 위 강)
+// - riverMouth(강 하구)
+// - pier(부두)
+// - sea(바다)
+export type Habitat =
+  | "all"
+  | "pond"
+  | "river"
+  | "clifftop"
+  | "riverMouth"
+  | "pier"
+  | "sea";
+
 function ListPageFallback() {
   return (
     <div className="p-4">
@@ -36,9 +55,6 @@ export default function ListPage() {
   );
 }
 
-// 가격 정렬 키. 기본값을 '가격 높은 순'으로 설정한다.
-type SortKey = "priceDesc" | "priceAsc";
-
 function ListPageInner() {
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS);
   const user = useLocalUser();
@@ -46,7 +62,10 @@ function ListPageInner() {
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [search, setSearch] = useState<string>("");
-  const [sort, setSort] = useState<SortKey>("priceDesc"); // 가격 높은 순을 기본으로
+  const [sort, setSort] = useState<SortKey>("priceDesc");
+
+  // 물고기 탭 전용 서식지 필터 (기본: 전체)
+  const [habitat, setHabitat] = useState<Habitat>("all");
 
   const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
 
@@ -54,7 +73,7 @@ function ListPageInner() {
     enabled: !!user,
     category: activeTab,
     hemisphere: hemi,
-    month: selectedMonth, // 0이면 전체
+    month: selectedMonth,
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -66,12 +85,47 @@ function ListPageInner() {
   const loading = itemsLoading || caughtLoading;
   const isAll = selectedMonth === 0;
 
-  // 월/시간 필터
+  // location 원문을 상위 6분류로 매핑
+  const simpleHabitat = (loc?: string | null): Habitat => {
+    if (!loc) return "all";
+    const s = loc.toLowerCase();
+
+    // 부두
+    if (s.includes("pier") || s.includes("부두")) return "pier";
+
+    // 절벽 위 강
+    if (s.includes("clifftop") || s.includes("절벽")) return "clifftop";
+
+    // 강(하구)
+    if (s.includes("mouth") || s.includes("하구")) return "riverMouth";
+
+    // 바다
+    if (s.includes("sea") || s.includes("ocean") || s.includes("beach") || s.includes("바다"))
+      return "sea";
+
+    // 연못/호수
+    if (s.includes("pond") || s.includes("lake") || s.includes("연못") || s.includes("호수"))
+      return "pond";
+
+    // 강(일반)
+    if (s.includes("river") || s.includes("강")) return "river";
+
+    return "all";
+  };
+
+  // 1차: 월/시간 필터
   const base = useMemo(() => {
     return isAll
       ? items
       : items.filter((it: Item) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
   }, [items, selectedMonth, selectedHour, hemi, isAll]);
+
+  // 2차: (물고기 탭 한정) 서식지 필터
+  const baseWithHabitat = useMemo(() => {
+    if (!base) return [];
+    if (activeTab !== "fish" || habitat === "all") return base;
+    return base.filter((it: Item) => simpleHabitat(it.location) === habitat);
+  }, [base, activeTab, habitat]);
 
   // 이름만 검색
   const matchesQuery = (it: Item, q: string) => {
@@ -81,16 +135,13 @@ function ListPageInner() {
     return hay.includes(needle);
   };
 
+  // 3차: 검색 필터
   const filtered = useMemo(() => {
-    if (!base) return [];
-    return base.filter((it: Item) => matchesQuery(it, search));
-  }, [base, search]);
+    if (!baseWithHabitat) return [];
+    return baseWithHabitat.filter((it: Item) => matchesQuery(it, search));
+  }, [baseWithHabitat, search]);
 
-  // 정렬: 미포획 먼저, 포획은 아래로 고정한다.
-  // 각 그룹 내부에서만 가격 정렬을 적용한다.
-  // - priceDesc: 가격 높은 순
-  // - priceAsc: 가격 낮은 순
-  // 가격이 없는 항목은 각 그룹의 맨 뒤로 보낸다. 동가에는 이름 오름차순을 사용한다.
+  // 4차: 정렬 – 미포획 그룹 먼저, 같은 그룹 내부에서 가격만 정렬
   const displayed = useMemo(() => {
     const nameAsc = (a: Item, b: Item) => a.name.localeCompare(b.name, "ko");
     const price = (x: Item) => (typeof x.sell_nook === "number" ? x.sell_nook : null);
@@ -98,17 +149,13 @@ function ListPageInner() {
     const arr = filtered.slice();
 
     return arr.sort((a, b) => {
-      const aGroup = caughtSet.has(a.originalName) ? 1 : 0; // 0: 미포획, 1: 포획
+      const aGroup = caughtSet.has(a.originalName) ? 1 : 0; // 0 미포획, 1 포획
       const bGroup = caughtSet.has(b.originalName) ? 1 : 0;
-
-      // 그룹 우선: 미포획(0)이 먼저, 포획(1)이 나중
       if (aGroup !== bGroup) return aGroup - bGroup;
 
-      // 같은 그룹 안에서는 가격 정렬
       const pa = price(a);
       const pb = price(b);
 
-      // 가격 미존재는 같은 그룹의 맨 뒤
       if (pa == null && pb == null) return nameAsc(a, b);
       if (pa == null) return 1;
       if (pb == null) return -1;
@@ -123,7 +170,7 @@ function ListPageInner() {
     });
   }, [filtered, caughtSet, sort]);
 
-  // 남은(미포획) 개수: 검색 결과 기준
+  // 남은(미포획) 개수 – 현재 필터(월/시간/서식지/검색) 반영
   const remainingCount = useMemo(() => {
     return filtered.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0);
   }, [filtered, caughtSet]);
@@ -144,18 +191,25 @@ function ListPageInner() {
             hemisphere={hemi}
             tabs={CATEGORY_TABS}
             activeTab={activeTab}
-            onChangeTab={setTab}
+            onChangeTab={(t) => {
+              setTab(t);
+              // 물고기 외 탭으로 넘어갈 때 의미 없으므로 리셋
+              setHabitat("all");
+            }}
             selectedMonth={selectedMonth}
             onChangeMonth={setSelectedMonth}
             selectedHour={selectedHour}
             onChangeHour={setSelectedHour}
             counts={{ [activeTab]: remainingCount }}
-            // 검색 props
+            // 검색
             searchTerm={search}
             onChangeSearch={setSearch}
-            // 정렬 드롭다운 props
+            // 정렬
             sort={sort}
             onChangeSort={setSort}
+            // 서식지 (물고기 전용)
+            habitat={habitat}
+            onChangeHabitat={setHabitat}
           />
 
           {displayed.length === 0 ? (

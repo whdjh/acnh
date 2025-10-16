@@ -28,9 +28,7 @@ export default function ItemsGrid({
             title={item.originalName}
             className={cn(
               "cursor-pointer transition border",
-              // 기본 카드 톤 유지 + hover 시 살짝 강조
               "bg-white border-border hover:shadow-sm hover:border-primary/30",
-              // 잡은 항목은 muted 톤으로 살짝 눌린 느낌
               isCaught && "bg-muted/40 border-border/60"
             )}
           >
