@@ -33,6 +33,7 @@ export async function GET(
         location: acnhItems.location,
         sellNook: acnhItems.sellNook,
         raw: acnhItems.raw,
+        shadowSize: acnhItems.shadowSize,
       })
       .from(acnhItems)
       .where(eq(acnhItems.category, category));
@@ -161,6 +162,7 @@ export async function GET(
         image_url: it.imageUrl,
         sell_nook: it.sellNook ?? undefined,
         location,
+        shadow_size: it.shadowSize ?? undefined,
         north: { months_array: northMonths },
         south: { months_array: southMonths },
         north_times_by_month: box.northTimes,

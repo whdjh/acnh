@@ -45,7 +45,7 @@ export default function ItemsGrid({
                 />
               </div>
 
-              <div className="mt-2 text-center">
+              <div className="mt-2 text-center space-y-0.5">
                 <div className="text-sm font-medium">{item.name}</div>
 
                 {item.location && (
@@ -57,6 +57,13 @@ export default function ItemsGrid({
                 {typeof item.sell_nook === "number" && (
                   <div className="text-xs text-muted-foreground/80">
                     {item.sell_nook.toLocaleString()} 벨
+                  </div>
+                )}
+
+                {/* ← 추가: 그림자 크기 표시 (벨 아래) */}
+                {item.shadow_size && (
+                  <div className="text-[11px] text-muted-foreground/80">
+                    그림자: {item.shadow_size}
                   </div>
                 )}
               </div>

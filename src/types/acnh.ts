@@ -22,4 +22,5 @@ export interface Item {
   times_by_month?: Record<string, TimesByMonthValue>;
   north_times_by_month?: Record<string, TimesByMonthValue>;
   south_times_by_month?: Record<string, TimesByMonthValue>;
+  shadow_size?: string;
 }
