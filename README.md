@@ -163,22 +163,23 @@ A. 가능합니다. 게임 업데이트나 데이터 출처에 따라 정보가 
 ## 화면 설명
 
 ### 홈 화면 (로그인/회원가입)
-
+<img width="315" height="566" alt="스크린샷 2025-10-26 오후 5 56 40" src="https://github.com/user-attachments/assets/cc95ef0b-4c67-4d3d-aa74-050041654ce9" />
+<img width="317" height="558" alt="스크린샷 2025-10-26 오후 5 57 12" src="https://github.com/user-attachments/assets/ba354494-038d-47d4-9b95-5b00643179ce" />
 
 메인 화면에서는 아이디를 입력하고 로그인하거나 회원가입할 수 있습니다. 회원가입 모드에서는 반구 선택 옵션이 나타납니다.
 
 ### 도감 리스트 화면
-
+<img width="317" height="568" alt="스크린샷 2025-10-26 오후 5 57 50" src="https://github.com/user-attachments/assets/c8e42faa-f930-4da4-938f-46d5e0dbcdd1" />
 
 도감 화면 상단에는 검색창, 월/시간 필터, 정렬 옵션이 있습니다. 아래에는 항목들이 카드 형태로 표시됩니다.
 
 ### 서식지 필터 (물고기 탭)
-
+<img width="317" height="568" alt="스크린샷 2025-10-26 오후 5 57 50" src="https://github.com/user-attachments/assets/c8e42faa-f930-4da4-938f-46d5e0dbcdd1" />
 
 물고기 탭을 선택하면 서식지 필터 버튼들이 나타납니다. 원하는 서식지를 선택하면 해당 위치에서 잡히는 물고기만 표시됩니다.
 
 ### 잡은 항목 관리
-
+<img width="313" height="567" alt="스크린샷 2025-10-26 오후 5 58 22" src="https://github.com/user-attachments/assets/77897aac-5d14-49eb-809d-e25ef43fd1fd" />
 
 잡은 항목은 자동으로 하단으로 이동하며 색상이 흐려집니다. 탭 옆의 숫자는 아직 잡지 못한 항목의 개수를 보여줍니다.
 
