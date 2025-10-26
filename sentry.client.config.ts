@@ -30,9 +30,9 @@ Sentry.init({
   // Filter errors before sending to Sentry
   beforeSend(event, hint) {
     const error = hint.originalException || hint.syntheticException;
-    const errorMessage = 
-      (error instanceof Error ? error.message : String(error || "")) || 
-      event.message || 
+    const errorMessage =
+      (error instanceof Error ? error.message : String(error || "")) ||
+      event.message ||
       "";
 
     // Ignore browser extension related errors
