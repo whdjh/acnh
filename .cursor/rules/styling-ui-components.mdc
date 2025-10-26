@@ -1,0 +1,311 @@
+---
+alwaysApply: true
+description: Tailwind CSS styling patterns and UI component standards
+---
+
+# Styling & UI Component Standards
+
+## 🚨 CRITICAL STYLING RULES
+
+### Tailwind CSS Usage
+- **ALWAYS** use Tailwind utility classes instead of custom CSS
+- **ALWAYS** use `cn()` utility from `@/lib/utils` for className merging
+- **ALWAYS** use CSS variables for colors (e.g., `bg-primary`, `text-muted-foreground`)
+- **ALWAYS** use responsive prefixes: `sm:`, `md:`, `lg:` for breakpoints
+- **ALWAYS** use dark mode prefix: `dark:` for dark mode styles
+- **NEVER** use inline styles (`style={{}}`) - use Tailwind classes
+- **NEVER** use hardcoded colors - use semantic tokens
+
+### Color System
+- **ALWAYS** use semantic color tokens:
+  - `primary` / `primary-foreground`
+  - `muted` / `muted-foreground`
+  - `destructive` / `destructive-foreground`
+  - `border`, `input`, `ring`
+- **ALWAYS** use opacity variants: `/10`, `/20`, `/30`, etc.
+- **ALWAYS** use white borders with opacity: `border-white/10`
+
+### Spacing & Layout
+- **ALWAYS** use Tailwind spacing scale: `p-4`, `gap-2`, `mt-8`
+- **ALWAYS** use flexbox utilities: `flex`, `items-center`, `justify-center`
+- **ALWAYS** use grid for item layouts: `grid grid-cols-3 gap-3`
+- **ALWAYS** use `min-h-[calc(100dvh-4rem)]` for full-height layouts
+
+### Border & Radius
+- **ALWAYS** use `rounded-xl` for cards
+- **ALWAYS** use `rounded-2xl` for main containers
+- **ALWAYS** use `border border-white/10` for card borders
+- **ALWAYS** use `backdrop-blur` for overlays
+
+### Typography
+- **ALWAYS** use custom font: `font-primary` (87mmilsang)
+- **ALWAYS** use semantic text sizes: `text-sm`, `text-base`, `text-xl`
+- **ALWAYS** use semantic text colors: `text-foreground`, `text-muted-foreground`
+- **ALWAYS** use `font-medium`, `font-semibold`, `font-bold` for weights
+
+## 📋 REQUIRED PATTERNS
+
+### Card Component Pattern
+```typescript
+<Card className={cn(
+  "cursor-pointer transition border",
+  "bg-white border-border hover:shadow-sm hover:border-primary/30",
+  isActive && "bg-muted/40 border-border/60"
+)}>
+  <CardContent>
+    {/* content */}
+  </CardContent>
+</Card>
+```
+
+### Container Pattern
+```typescript
+<div className="rounded-2xl border border-white/10 backdrop-blur p-5 shadow-sm">
+  {/* content */}
+</div>
+```
+
+### Button Pattern
+```typescript
+<Button
+  variant="default" // or "outline", "ghost", "link", "destructive"
+  size="sm" // or "default", "lg"
+  onClick={handleClick}
+  disabled={loading}
+  className="w-full" // additional classes
+>
+  {loading ? "처리 중..." : "제출"}
+</Button>
+```
+
+### Input Pattern
+```typescript
+<Input
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
+  placeholder="입력하세요"
+  className="h-8 text-sm" // size adjustments
+  onKeyDown={onKeyDown}
+/>
+```
+
+### Conditional Styling Pattern
+```typescript
+className={cn(
+  "base-classes-here",
+  condition && "conditional-class",
+  anotherCondition && "another-conditional-class",
+  isActive && "active-state-class",
+  isDisabled && "disabled-state-class"
+)}
+```
+
+### Grid Layout Pattern
+```typescript
+// 3-column grid for items
+<div className="grid grid-cols-3 gap-3">
+  {items.map(item => (
+    <Card key={item.id}>...</Card>
+  ))}
+</div>
+
+// Responsive grid
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+  {/* items */}
+</div>
+```
+
+### Flex Layout Pattern
+```typescript
+// Centered content
+<div className="flex items-center justify-center min-h-screen">
+  {/* content */}
+</div>
+
+// Space between
+<div className="flex items-center justify-between">
+  {/* content */}
+</div>
+
+// Column layout
+<div className="flex flex-col gap-4">
+  {/* content */}
+</div>
+```
+
+## 🎨 UI COMPONENT RULES
+
+### Component Structure
+- **ALWAYS** use `data-slot` attributes for component parts
+- **ALWAYS** spread props with `React.ComponentProps`
+- **ALWAYS** merge className with `cn()` utility
+- **ALWAYS** provide default variants
+
+### Button Variants
+```typescript
+// ✅ CORRECT Usage
+<Button variant="default">Primary</Button>
+<Button variant="outline">Secondary</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="link">Link</Button>
+<Button variant="destructive">Delete</Button>
+```
+
+### Card Components
+- **ALWAYS** use Card, CardContent, CardHeader, CardFooter
+- **ALWAYS** provide semantic structure
+- **ALWAYS** use consistent padding: `p-3` or `px-3 py-3`
+
+### Form Components
+- **ALWAYS** use controlled components
+- **ALWAYS** handle keyboard events (Enter key)
+- **ALWAYS** provide loading states
+- **ALWAYS** validate input before submission
+
+## 🔴 STYLING ANTI-PATTERNS
+
+### What NOT to Do
+- ❌ **NEVER** use `style={{ color: 'red' }}` - use `className="text-destructive"`
+- ❌ **NEVER** use hardcoded colors: `bg-[#fff]` - use `bg-background`
+- ❌ **NEVER** write custom CSS when Tailwind utilities exist
+- ❌ **NEVER** use `!important` - fix specificity with proper class order
+- ❌ **NEVER** skip responsive design
+- ❌ **NEVER** forget dark mode styles
+
+### Common Mistakes
+- ❌ **NEVER** mix px values: `p-[13px]` - use scale: `p-3`
+- ❌ **NEVER** use arbitrary values without reason
+- ❌ **NEVER** duplicate className logic - extract to constants
+- ❌ **NEVER** hardcode breakpoints - use Tailwind breakpoints
+
+## 📐 LAYOUT PATTERNS
+
+### Page Layout
+```typescript
+<div className="min-h-[calc(100dvh-4rem)] flex flex-col">
+  <header className="w-full px-4 pt-4">
+    {/* header content */}
+  </header>
+  
+  <main className="flex-1 flex items-center justify-center px-4">
+    {/* main content */}
+  </main>
+  
+  <footer className="w-full px-4 pb-3">
+    {/* footer content */}
+  </footer>
+</div>
+```
+
+### Centered Card Layout
+```typescript
+<div className="flex items-center justify-center min-h-screen px-4">
+  <div className="w-full max-w-sm rounded-2xl border border-white/10 backdrop-blur p-5 shadow-sm">
+    {/* card content */}
+  </div>
+</div>
+```
+
+### Grid Layout with Cards
+```typescript
+<div className="grid grid-cols-3 gap-3">
+  {items.map(item => (
+    <Card
+      key={item.id}
+      className={cn(
+        "cursor-pointer transition",
+        isSelected && "ring-2 ring-primary"
+      )}
+    >
+      {/* card content */}
+    </Card>
+  ))}
+</div>
+```
+
+## 🎯 RESPONSIVE DESIGN
+
+### Breakpoint Strategy
+- Mobile first: Default styles for mobile
+- `sm:` - Small screens (640px+)
+- `md:` - Medium screens (768px+)
+- `lg:` - Large screens (1024px+)
+
+### Responsive Patterns
+```typescript
+// Responsive grid
+<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
+// Responsive text
+<div className="text-sm sm:text-base md:text-lg">
+
+// Responsive spacing
+<div className="p-4 sm:p-6 md:p-8">
+
+// Responsive width
+<div className="w-full sm:w-[420px] md:w-[520px]">
+```
+
+## 🌙 DARK MODE
+
+### Dark Mode Patterns
+- **ALWAYS** provide dark mode styles with `dark:` prefix
+- **ALWAYS** test both light and dark modes
+- **ALWAYS** use CSS variables for theme colors
+
+```typescript
+className={cn(
+  "bg-white dark:bg-card",
+  "text-foreground dark:text-card-foreground",
+  "border-border dark:border-white/10"
+)}
+```
+
+## 💡 COMMON UTILITIES
+
+### Hover States
+```typescript
+className="hover:bg-accent hover:text-accent-foreground transition"
+className="hover:opacity-100 opacity-85 transition-opacity"
+className="hover:ring-white/20 ring-white/10 transition"
+```
+
+### Focus States
+```typescript
+className="focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+```
+
+### Disabled States
+```typescript
+className="disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+```
+
+### Loading States
+```typescript
+{loading ? (
+  <Skeleton className="h-9 w-full" />
+) : (
+  <Content />
+)}
+```
+
+## 🎨 COLOR TOKENS REFERENCE
+
+### Background Colors
+- `bg-background` - Main background
+- `bg-card` - Card background
+- `bg-primary` - Primary actions
+- `bg-muted` - Muted/supporting elements
+- `bg-accent` - Accent/hover states
+
+### Text Colors
+- `text-foreground` - Primary text
+- `text-muted-foreground` - Secondary text
+- `text-primary-foreground` - Text on primary bg
+- `text-destructive` - Error/destructive text
+
+### Border Colors
+- `border-border` - Default borders
+- `border-white/10` - Subtle borders (dark mode)
+- `border-input` - Input borders
+- `border-ring` - Focus rings

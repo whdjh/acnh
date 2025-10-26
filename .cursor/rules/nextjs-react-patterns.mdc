@@ -1,0 +1,341 @@
+---
+alwaysApply: true
+description: Next.js App Router and React specific patterns and best practices
+---
+
+# Next.js App Router & React Patterns
+
+## 🚨 CRITICAL NEXT.JS RULES
+
+### App Router Structure
+- **ALWAYS** use App Router patterns (`app/` directory)
+- **ALWAYS** use Server Components by default
+- **ALWAYS** export `dynamic = "force-dynamic"` for dynamic routes that need fresh data
+- **ALWAYS** use `export const metadata` for page metadata (not `<Head>`)
+- **NEVER** use Pages Router patterns in this project
+
+### Route Handlers
+- **ALWAYS** use named exports (`GET`, `POST`, etc.) for route handlers
+- **ALWAYS** handle `params` as Promise: `ctx: { params: Promise<{ id: string }> }`
+- **ALWAYS** await params: `const { id } = await ctx.params`
+- **ALWAYS** use `NextResponse.json()` for JSON responses
+- **ALWAYS** set proper cache headers: `Cache-Control: no-store` for dynamic data
+
+### Dynamic Routes
+```typescript
+// ✅ CORRECT
+export async function GET(
+  req: Request,
+  ctx: { params: Promise<{ category: string }> }
+) {
+  const { category } = await ctx.params;
+  // ...
+}
+
+// ❌ WRONG - Don't use non-promise params
+export async function GET(req: Request, { params }: { params: { id: string } }) {
+  // This is Pages Router pattern
+}
+```
+
+### Suspense & Loading States
+- **ALWAYS** wrap async components with Suspense
+- **ALWAYS** provide meaningful fallback UI
+- **ALWAYS** use skeleton components for loading states
+- **NEVER** show blank screens during loading
+
+```typescript
+// ✅ CORRECT Pattern
+export default function Page() {
+  return (
+    <Suspense fallback={<LoadingSkeleton />}>
+      <PageContent />
+    </Suspense>
+  );
+}
+```
+
+## 🚨 CRITICAL REACT RULES
+
+### Hooks Rules
+- **ALWAYS** call hooks at the top level of components
+- **ALWAYS** include all dependencies in hook dependency arrays
+- **ALWAYS** clean up effects (AbortController, subscriptions, etc.)
+- **NEVER** call hooks conditionally
+- **NEVER** omit dependencies from useEffect/useMemo/useCallback
+
+### State Management
+- **ALWAYS** use functional updates for state depending on previous state
+- **ALWAYS** track request keys to prevent race conditions
+- **ALWAYS** handle loading, error, and success states
+
+```typescript
+// ✅ CORRECT - Request deduplication
+const reqKeyRef = useRef(0);
+
+const load = useCallback(async () => {
+  const myKey = ++reqKeyRef.current;
+  // ... fetch logic
+  if (reqKeyRef.current === myKey) {
+    setData(result); // Only update if this is the latest request
+  }
+}, [dependencies]);
+```
+
+### Component Optimization
+- **ALWAYS** memoize expensive computations with `useMemo`
+- **ALWAYS** memoize callbacks passed to child components with `useCallback`
+- **ALWAYS** use React.memo for expensive components (not every component)
+- **NEVER** over-optimize - profile first
+
+### Props & Component Design
+- **ALWAYS** destructure props in function signature
+- **ALWAYS** define prop types with interfaces
+- **ALWAYS** use default parameters for optional props
+- **NEVER** mutate props directly
+- **NEVER** use prop drilling beyond 2-3 levels - use context or state management
+
+## 📋 REQUIRED PATTERNS
+
+### Client Component Pattern
+```typescript
+"use client";
+
+import { useState, useCallback } from "react";
+
+interface Props {
+  // typed props
+}
+
+export default function ClientComponent({ prop }: Props) {
+  const [state, setState] = useState<Type>(initialValue);
+  
+  const handleAction = useCallback(() => {
+    // logic
+  }, [dependencies]);
+  
+  return <div>...</div>;
+}
+```
+
+### Server Component Pattern
+```typescript
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Page Title",
+  description: "Page description",
+};
+
+export default async function ServerPage() {
+  // Can use async/await for data fetching
+  const data = await fetchData();
+  
+  return <div>...</div>;
+}
+```
+
+### Custom Hook with Fetch Pattern
+```typescript
+"use client";
+
+export function useDataFetch(opts: Options) {
+  const [data, setData] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const reqKeyRef = useRef(0);
+  
+  const fetch = useCallback(async () => {
+    if (!opts.enabled) return;
+    
+    setLoading(true);
+    setError(null);
+    const myKey = ++reqKeyRef.current;
+    const ac = new AbortController();
+    
+    try {
+      const res = await fetch(url, { signal: ac.signal });
+      const result = await assertJson<ResponseType>(res);
+      
+      if (reqKeyRef.current === myKey) {
+        setData(result);
+      }
+    } catch (e: any) {
+      if (e?.name !== "AbortError" && reqKeyRef.current === myKey) {
+        setError(e?.message ?? "Failed");
+      }
+    } finally {
+      if (reqKeyRef.current === myKey) {
+        setLoading(false);
+      }
+    }
+    
+    return () => ac.abort();
+  }, [opts.enabled, /* other deps */]);
+  
+  useEffect(() => {
+    fetch();
+  }, [fetch]);
+  
+  return { data, loading, error, refetch: fetch };
+}
+```
+
+### Form Handling Pattern
+```typescript
+const [value, setValue] = useState("");
+const [loading, setLoading] = useState(false);
+
+const handleSubmit = useCallback(async () => {
+  if (!value.trim()) return;
+  setLoading(true);
+  
+  try {
+    const res = await fetch("/api/endpoint", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+    const data = await assertJson<ResponseType>(res);
+    
+    if (!data.ok) {
+      alert(data.error || "Failed");
+      return;
+    }
+    
+    // Success handling
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
+  } finally {
+    setLoading(false);
+  }
+}, [value]);
+
+const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    void handleSubmit();
+  }
+};
+```
+
+## 🔴 REACT ANTI-PATTERNS
+
+### Hooks Violations
+- ❌ **NEVER** call hooks inside loops, conditions, or nested functions
+- ❌ **NEVER** forget dependencies in useEffect/useMemo/useCallback
+- ❌ **NEVER** use `useEffect` for synchronous state updates
+- ❌ **NEVER** mutate state directly (`state.push()`)
+
+### Performance Issues
+- ❌ **NEVER** create new objects/arrays in render without memoization
+- ❌ **NEVER** pass inline functions as props without useCallback
+- ❌ **NEVER** create large components (>300 lines) without splitting
+
+### Common Mistakes
+- ❌ **NEVER** use `index` as React key when list items can reorder
+- ❌ **NEVER** forget to handle loading/error states
+- ❌ **NEVER** create infinite loops with useEffect dependencies
+- ❌ **NEVER** fetch data in useEffect without cleanup
+
+## 🎯 EVENT HANDLING PATTERNS
+
+### Click Handlers
+```typescript
+// ✅ CORRECT
+const handleClick = useCallback(() => {
+  // logic
+}, [dependencies]);
+
+<button onClick={handleClick}>Click</button>
+
+// ✅ CORRECT - Simple inline (only if no dependencies)
+<button onClick={() => doSomething()}>Click</button>
+```
+
+### Form Handlers
+```typescript
+// ✅ CORRECT
+const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  setValue(e.target.value);
+}, []);
+
+<Input value={value} onChange={handleChange} />
+```
+
+### Keyboard Handlers
+```typescript
+// ✅ CORRECT
+const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    handleSubmit();
+  }
+};
+
+<Input onKeyDown={onKeyDown} />
+```
+
+## 📊 DATA FETCHING PATTERNS
+
+### Client-Side Fetching
+- Use custom hooks with `useState` and `useEffect`
+- Always handle loading, error, and data states
+- Always use AbortController for cancellation
+- Always track request keys to prevent race conditions
+
+### Server-Side Data
+- Use async Server Components
+- Fetch directly in component (no hooks)
+- Can use Drizzle ORM directly
+
+## 🔄 STATE UPDATES
+
+### Functional Updates
+```typescript
+// ✅ CORRECT - When depending on previous state
+setState(prev => {
+  const next = new Set(prev);
+  next.add(item);
+  return next;
+});
+
+// ✅ CORRECT - Simple update
+setState(newValue);
+```
+
+### Optimistic Updates
+```typescript
+// ✅ CORRECT Pattern
+const toggleItem = useCallback(async (id: string) => {
+  // Optimistic update
+  setState(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    return next;
+  });
+  
+  try {
+    const res = await fetch("/api/toggle", { /* ... */ });
+    const data = await assertJson<{ success: boolean }>(res);
+    
+    // Server confirmation
+    setState(prev => {
+      const next = new Set(prev);
+      if (data.success) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  } catch (e) {
+    // Rollback optimistic update
+    setState(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+}, []);
+```

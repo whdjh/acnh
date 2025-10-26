@@ -1,0 +1,240 @@
+---
+alwaysApply: true
+description: Core project standards, conventions, and code patterns for ACNH project
+---
+
+# ACNH Project Standards & Conventions
+
+## 🚨 CRITICAL RULES - MUST FOLLOW
+
+### TypeScript & Type Safety
+- **ALWAYS** use TypeScript strict mode - type everything explicitly
+- **NEVER** use `any` - use `unknown` if type is truly unknown, then narrow it
+- **ALWAYS** define interfaces/types for component props, function parameters, and API responses
+- **ALWAYS** use union types for constrained values (e.g., `"north" | "south"`)
+- **REQUIRED**: Prefix custom hooks with `use` (e.g., `useAcnhItems`)
+
+### Client Components
+- **MUST** add `"use client"` directive at the top of client components
+- **MUST** use Server Components by default (no `"use client"` unless needed)
+- **ALWAYS** wrap client-specific logic in hooks or client components
+
+### File Structure & Naming
+- **ALWAYS** follow this structure:
+  - `src/app/` - Next.js App Router pages/routes
+  - `src/components/` - Reusable components
+    - `components/ui/` - Generic UI components (shadcn/ui style)
+    - `components/[domain]/` - Domain-specific components
+  - `src/hook/` - Custom React hooks
+  - `src/lib/` - Utility functions
+  - `src/types/` - TypeScript type definitions
+- **ALWAYS** use kebab-case for files, PascalCase for components
+- **NEVER** mix naming conventions within a file
+
+### Component Patterns
+- **ALWAYS** use `cn()` utility from `@/lib/utils` for className merging
+- **ALWAYS** use `data-slot` attributes for component parts (Card, Button, etc.)
+- **ALWAYS** destructure props with explicit types in interfaces
+- **REQUIRED**: Component props must be typed with interfaces, not inline
+- **NEVER** use inline styles - use Tailwind classes only
+
+### Styling Rules
+- **ALWAYS** use Tailwind CSS utility classes - no custom CSS unless absolutely necessary
+- **ALWAYS** use CSS variables for theme colors (e.g., `bg-primary`, `text-muted-foreground`)
+- **ALWAYS** use `border-white/10` pattern for borders in dark mode
+- **ALWAYS** use backdrop blur: `backdrop-blur` for overlays
+- **ALWAYS** use `rounded-xl` or `rounded-2xl` for card containers
+- **ALWAYS** use responsive prefixes: `sm:`, `md:` for breakpoints
+- **NEVER** use hardcoded colors - use semantic tokens (primary, muted, destructive)
+
+### State Management
+- **ALWAYS** use `useState` for local component state
+- **ALWAYS** use `useMemo` for expensive computations (filtering, sorting)
+- **ALWAYS** use `useCallback` for functions passed as props or dependencies
+- **ALWAYS** use `useRef` for request tracking to prevent race conditions
+- **ALWAYS** use `AbortController` for fetch requests to enable cancellation
+
+### API Routes
+- **ALWAYS** return JSON in format: `{ ok: boolean, data?: T, error?: string }`
+- **ALWAYS** validate input parameters (category, userId, etc.)
+- **ALWAYS** use try-catch for error handling
+- **ALWAYS** set proper HTTP status codes (400, 500, etc.)
+- **ALWAYS** use `NextResponse.json()` for responses
+- **REQUIRED**: For dynamic routes, use `await ctx.params` pattern
+- **NEVER** forget to handle async operations properly
+
+### Error Handling
+- **ALWAYS** use `assertJson` utility for API response validation
+- **ALWAYS** implement optimistic updates with rollback on failure
+- **ALWAYS** track request keys to prevent race conditions
+- **ALWAYS** show user-friendly error messages in Korean
+- **NEVER** expose internal error details to users
+
+### Loading States
+- **ALWAYS** provide loading states for async operations
+- **ALWAYS** use Skeleton components during loading
+- **ALWAYS** wrap async components with Suspense boundaries
+- **ALWAYS** show fallback UI while loading
+
+### Accessibility (A11y)
+- **ALWAYS** add `aria-label` for icon-only buttons
+- **ALWAYS** use semantic HTML elements
+- **ALWAYS** handle keyboard navigation (Enter key, etc.)
+- **ALWAYS** provide alt text for images
+- **ALWAYS** ensure focus indicators are visible
+
+### Korean Localization
+- **ALWAYS** use Korean text for user-facing content
+- **ALWAYS** format dates/times in Korean (e.g., "04–21시", "종일")
+- **ALWAYS** use custom font `87mmilsang` for body text
+- **NEVER** hardcode English text in UI
+
+## 🔴 ABSOLUTE PROHIBITIONS - NEVER DO THIS
+
+### TypeScript Anti-patterns
+- ❌ **NEVER** use `any` type
+- ❌ **NEVER** disable TypeScript strict checks
+- ❌ **NEVER** use `@ts-ignore` or `@ts-expect-error` without explanation
+- ❌ **NEVER** use `Function` type - use explicit function signatures
+
+### Component Anti-patterns
+- ❌ **NEVER** mix Server and Client components incorrectly
+- ❌ **NEVER** use inline styles (`style={{}}`) - use Tailwind classes
+- ❌ **NEVER** omit prop types in component definitions
+- ❌ **NEVER** mutate props directly
+- ❌ **NEVER** use `index` as React key - use unique identifiers
+
+### Styling Anti-patterns
+- ❌ **NEVER** use hardcoded colors (#fff, rgb(255,255,255))
+- ❌ **NEVER** write custom CSS when Tailwind utilities exist
+- ❌ **NEVER** use `!important` in Tailwind - use proper specificity
+- ❌ **NEVER** skip responsive design considerations
+
+### State Management Anti-patterns
+- ❌ **NEVER** forget to add dependencies to useEffect/useMemo/useCallback
+- ❌ **NEVER** update state directly without setState
+- ❌ **NEVER** create infinite loops with dependencies
+- ❌ **NEVER** forget to clean up effects (AbortController, event listeners)
+
+### API Anti-patterns
+- ❌ **NEVER** skip input validation
+- ❌ **NEVER** expose database queries directly without validation
+- ❌ **NEVER** forget error handling in async operations
+- ❌ **NEVER** return sensitive data in API responses
+
+### Code Quality Anti-patterns
+- ❌ **NEVER** commit console.log statements in production code
+- ❌ **NEVER** use `var` - always use `const` or `let`
+- ❌ **NEVER** create deep nested ternary operators (> 2 levels)
+- ❌ **NEVER** use magic numbers - use named constants
+
+## 📋 REQUIRED PATTERNS
+
+### Custom Hook Pattern
+```typescript
+export function useCustomHook(opts: UseCustomHookOpts) {
+  const [data, setData] = useState<DataType[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const reqKeyRef = useRef(0);
+  
+  // ... implementation
+  
+  return { data, loading, error, refetch };
+}
+```
+
+### Component Props Pattern
+```typescript
+interface ComponentProps {
+  required: string;
+  optional?: number;
+  callback: (value: string) => void;
+}
+
+export default function Component({ required, optional, callback }: ComponentProps) {
+  // ... implementation
+}
+```
+
+### API Route Pattern
+```typescript
+export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await ctx.params;
+    // Validate input
+    if (!id) {
+      return NextResponse.json({ ok: false, error: "Invalid input" }, { status: 400 });
+    }
+    // ... logic
+    return NextResponse.json({ ok: true, data: result });
+  } catch (e) {
+    console.error(e);
+    return NextResponse.json({ ok: false, error: "Server error" }, { status: 500 });
+  }
+}
+```
+
+### Conditional Styling Pattern
+```typescript
+className={cn(
+  "base-classes",
+  condition && "conditional-class",
+  anotherCondition && "another-class",
+  isActive && "active-class"
+)}
+```
+
+### Memoization Pattern
+```typescript
+const filtered = useMemo(() => {
+  return items.filter(item => /* condition */);
+}, [items, dependencies]);
+
+const handleClick = useCallback(() => {
+  // logic
+}, [dependencies]);
+```
+
+## 🎯 CODE ORGANIZATION RULES
+
+### Import Order
+1. React/Next.js imports
+2. Third-party library imports
+3. Internal imports (components, hooks, lib, types)
+4. Type-only imports last
+
+### Component Structure
+1. Type definitions (interfaces, types)
+2. Constants
+3. Helper functions
+4. Main component
+5. Exports
+
+### File Organization
+- Keep files focused on single responsibility
+- Split large components into smaller, reusable pieces
+- Extract complex logic into custom hooks
+- Move utility functions to `lib/` directory
+
+## 📝 COMMENTS & DOCUMENTATION
+
+- **ALWAYS** add JSDoc comments for exported functions
+- **ALWAYS** explain complex business logic
+- **ALWAYS** add comments for non-obvious code decisions
+- **ALWAYS** use Korean comments for business domain concepts
+- **NEVER** leave TODO comments without context
+
+## 🧪 TESTING CONSIDERATIONS
+
+- Structure code to be testable
+- Separate business logic from UI components
+- Use pure functions when possible
+- Keep components simple and focused
+
+## 🔄 REFACTORING GUIDELINES
+
+- When duplicating code, extract to shared utility or hook
+- When component exceeds 200 lines, consider splitting
+- When props exceed 5-6 items, consider creating a config object
+- When logic is reused in 3+ places, extract to custom hook
