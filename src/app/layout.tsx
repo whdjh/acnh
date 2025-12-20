@@ -51,6 +51,14 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
+        {/* 폰트 preload - Critical request chain 최적화 */}
+        <link
+          rel="preload"
+          href="/fonts/87MMILSANG-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
         {/* Google Tag Manager - head 상단 */}
         <Script id="gtm-head" strategy="beforeInteractive">
           {`
