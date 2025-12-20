@@ -1,4 +1,4 @@
-import {withSentryConfig} from '@sentry/nextjs';
+import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
@@ -10,6 +10,17 @@ const nextConfig: NextConfig = {
         permanent: true, // 301
       },
     ];
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'dodo.ac',
+        pathname: '/**',
+      },
+    ],
+    // 이미지 최적화 및 캐싱 설정
+    minimumCacheTTL: 60 * 60 * 24 * 365, // 1년 (최대 캐시 시간)
   },
 };
 

@@ -3,6 +3,7 @@
 import type { Item } from "@/types/acnh";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 export default function ItemsGrid({
   items,
@@ -33,14 +34,16 @@ export default function ItemsGrid({
             )}
           >
             <CardContent className="pt-0">
-              <div className="w-full aspect-square">
-                <img
+              <div className="w-full aspect-square relative">
+                <Image
                   src={item.image_url}
                   alt={item.name}
+                  fill
                   className={cn(
-                    "w-full h-full object-contain transition",
+                    "object-contain transition",
                     isCaught && "opacity-70"
                   )}
+                  sizes="(max-width: 768px) 33vw, 200px"
                   loading="lazy"
                 />
               </div>
