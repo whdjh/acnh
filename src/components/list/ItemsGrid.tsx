@@ -18,9 +18,11 @@ export default function ItemsGrid({
 }) {
   return (
     <div className="grid grid-cols-3 gap-3">
-      {items.map((item) => {
+      {items.map((item, index) => {
         const isCaught = caughtSet.has(item.originalName);
         const timesText = timesFor(item);
+        // 첫 번째 이미지에 priority 적용 (LCP 최적화)
+        const isLcpImage = index === 0;
 
         return (
           <Card
@@ -44,7 +46,7 @@ export default function ItemsGrid({
                     isCaught && "opacity-70"
                   )}
                   sizes="(max-width: 768px) 33vw, 200px"
-                  loading="lazy"
+                  priority={isLcpImage}
                 />
               </div>
 
