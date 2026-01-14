@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Category, Item } from "@/types/acnh";
+import { assertJson } from "@/lib/utils";
 
 type UseAcnhItemsOpts = {
   enabled: boolean;
@@ -11,13 +12,10 @@ type UseAcnhItemsOpts = {
   month: number;
 };
 
-async function assertJson<T = any>(res: Response): Promise<T> {
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Expected JSON, got ${ct}. ${text.slice(0, 160)}`);
-  }
-  return res.json();
+interface ApiItemsResponse {
+  ok: boolean;
+  data?: Item[];
+  error?: string;
 }
 
 export function useAcnhItems({
@@ -58,21 +56,21 @@ export function useAcnhItems({
         signal: ac.signal,
       });
 
-      const data = await assertJson<{ ok: boolean; data?: any; error?: string }>(res);
+      const data = await assertJson<ApiItemsResponse>(res);
       if (!data.ok) throw new Error(data.error || "fetch failed");
 
-      const formatted: Item[] = (data.data ?? []).map((item: any) => ({
+      const formatted: Item[] = (data.data ?? []).map((item) => ({
         ...item,
         originalName: item.originalName || item.name_en || item.name,
       }));
 
       if (reqKeyRef.current === myKey) setItems(formatted);
-    } catch (e: any) {
-      if (e?.name !== "AbortError") {
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== "AbortError") {
         console.error("GET /api/items failed:", e);
         if (reqKeyRef.current === myKey) {
           setItems([]);
-          setError(e?.message ?? "데이터를 불러오지 못했습니다.");
+          setError(e.message ?? "데이터를 불러오지 못했습니다.");
         }
       }
     } finally {

@@ -3,10 +3,18 @@
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+interface GtmPageViewEvent {
+  event: "pageview";
+  page_location: string;
+  page_path: string;
+  page_title: string;
+  page_referrer?: string;
+}
+
 declare global {
   interface Window {
-    dataLayer: Array<Record<string, unknown>>;
-    gtag?: (...args: any[]) => void;
+    dataLayer: GtmPageViewEvent[];
+    gtag?: (...args: unknown[]) => void;
   }
 }
 
