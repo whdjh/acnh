@@ -2,15 +2,14 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { Category } from "@/types/acnh";
+import { assertJson } from "@/lib/utils";
 
-/** 내부 전용: 응답이 JSON인지 보장 */
-async function assertJson<T = any>(res: Response): Promise<T> {
-  const ct = res.headers.get("content-type") || "";
-  if (!ct.includes("application/json")) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Expected JSON, got ${ct}. ${text.slice(0, 160)}`);
-  }
-  return res.json();
+interface ApiCaughtResponse {
+  items?: string[];
+}
+
+interface ApiToggleResponse {
+  caught: boolean;
 }
 
 type UseCaughtItemsOpts = {
@@ -48,17 +47,17 @@ export function useCaughtItems({ enabled, userId, category }: UseCaughtItemsOpts
         signal: ac.signal,
       });
 
-      const data = await assertJson<{ items?: string[] }>(res);
+      const data = await assertJson<ApiCaughtResponse>(res);
       // 최신 요청만 반영
       if (reqKeyRef.current === myKey) {
         setCaughtSet(new Set(data.items ?? []));
       }
-    } catch (e: any) {
-      if (e?.name !== "AbortError") {
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== "AbortError") {
         console.error("GET /api/caught failed:", e);
         if (reqKeyRef.current === myKey) {
           setCaughtSet(new Set());
-          setError(e?.message ?? "불러오기 실패");
+          setError(e.message ?? "불러오기 실패");
         }
       }
     } finally {
@@ -106,7 +105,7 @@ export function useCaughtItems({ enabled, userId, category }: UseCaughtItemsOpts
           }),
         });
 
-        const data = await assertJson<{ caught: boolean }>(res);
+        const data = await assertJson<ApiToggleResponse>(res);
 
         // 서버 결과로 정합성 보정
         setCaughtSet((prev) => {
