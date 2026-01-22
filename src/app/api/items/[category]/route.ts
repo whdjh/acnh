@@ -7,6 +7,18 @@ import { nameKoMap, locationKoMap } from "@/lib/localization";
 const VALID_CATEGORIES = ["fish", "bug", "sea", "fossil"] as const;
 type ValidCategory = (typeof VALID_CATEGORIES)[number];
 
+/**
+ * 아이템 목록을 조회하는 API 엔드포인트
+ * 
+ * 쿼리 파라미터:
+ * - month: 월 필터 (1~12, 전체는 생략)
+ * - hemi: 반구 ("north" | "south", 기본값: "north")
+ * - only: 서버측 월 필터 적용 여부 ("1"이면 해당 월에만 존재하는 아이템만 반환)
+ * 
+ * @param req - 요청 객체
+ * @param ctx - 라우트 컨텍스트 (category 파라미터 포함)
+ * @returns 아이템 목록과 가용성 정보를 포함한 JSON 응답
+ */
 export async function GET(
   req: Request,
   ctx: { params: Promise<{ category: ValidCategory }> }
@@ -76,15 +88,25 @@ export async function GET(
       };
     }
 
-    // 비트마스크(0~23) → 라벨("All day" | "NA" | "x AM – y PM, ...")
+    /**
+     * 비트마스크를 시간 라벨 문자열로 변환합니다.
+     * 
+     * 비트마스크는 24비트 정수로, 각 비트는 해당 시간(0~23시)의 가용성을 나타냅니다.
+     * 예: 0x00000FFF (0~11시 활성) → "12 AM – 11 AM"
+     * 
+     * @param mask - 24비트 시간 마스크 (0~0xFFFFFF)
+     * @returns 시간 라벨 문자열 ("All day" | "NA" | "4 AM – 9 PM, ...")
+     */
     const maskToLabel = (mask: number): string => {
       if (!mask || mask === 0) return "NA";
       if (mask === 0xffffff) return "All day"; // 24비트 all on
+      
       // 0~23 연속 구간으로 묶기
       const hours: number[] = [];
       for (let h = 0; h < 24; h++) {
         if (mask & (1 << h)) hours.push(h);
       }
+      
       // 연속 구간 찾기
       const ranges: Array<[number, number]> = [];
       let start = hours[0];
@@ -101,7 +123,8 @@ export async function GET(
       }
       ranges.push([start, prev + 1]);
 
-      // 24시 경계 래핑(예: 21~24, 0~4 → 21~4)
+      // 24시 경계 래핑 처리 (예: 21~24, 0~4 → 21~4)
+      // 자정을 넘어가는 시간대를 하나의 구간으로 합칩니다
       if (ranges.length >= 2) {
         const first = ranges[0];
         const last = ranges[ranges.length - 1];
@@ -110,11 +133,16 @@ export async function GET(
           const merged: Array<[number, number]> = [[last[0], first[1]]];
           // 사이에 낀 구간들
           for (let i = 1; i < ranges.length - 1; i++) merged.push(ranges[i]);
-          // 래핑 구간을 뒤로 보내서 “9 PM–4 AM” 같은 표현을 만들자
+          // 래핑 구간을 뒤로 보내서 "9 PM–4 AM" 같은 표현을 만듭니다
           ranges.splice(0, ranges.length, ...merged);
         }
       }
 
+      /**
+       * 시간(0~23)을 12시간 형식 문자열로 변환합니다.
+       * @param h - 시간 (0~23)
+       * @returns "12 AM", "1 PM" 등의 형식 문자열
+       */
       const toStr = (h: number) => {
         const hh = ((h % 24) + 24) % 24;
         const ampm = hh < 12 ? "AM" : "PM";
