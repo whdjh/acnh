@@ -13,6 +13,9 @@ import { X } from "lucide-react";
 import type { Category } from "@/types/acnh";
 import type { Habitat } from "@/app/list/page";
 
+/**
+ * 리스트 헤더 컴포넌트의 Props
+ */
 interface ListHeaderProps {
   username: string;
   hemisphere: "north" | "south";
@@ -29,11 +32,25 @@ interface ListHeaderProps {
   sort: "priceDesc" | "priceAsc";
   onChangeSort: (v: "priceDesc" | "priceAsc") => void;
 
-  // 물고기 전용 서식지 제어
+  /** 물고기 전용 서식지 필터 (물고기 카테고리에서만 사용) */
   habitat: Habitat;
+  /** 서식지 변경 핸들러 */
   onChangeHabitat: (v: Habitat) => void;
 }
 
+/**
+ * 리스트 페이지 헤더 컴포넌트
+ * 
+ * 아이템 목록을 필터링하고 정렬하기 위한 UI를 제공합니다.
+ * - 사용자 이름 및 반구 표시
+ * - 이름 검색
+ * - 월/시간 필터
+ * - 가격 정렬
+ * - 카테고리 탭 (물고기/곤충/해양생물/화석)
+ * - 물고기 전용 서식지 필터
+ * 
+ * @param props - ListHeaderProps
+ */
 export default function ListHeader({
   username,
   hemisphere,
