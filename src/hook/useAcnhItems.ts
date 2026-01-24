@@ -12,9 +12,24 @@ type UseAcnhItemsOpts = {
   month: number;
 };
 
+interface ApiItemResponse {
+  originalName?: string;
+  name: string;
+  name_en?: string;
+  image_url: string;
+  location?: string;
+  sell_nook?: number;
+  north: { months_array: number[] };
+  south: { months_array: number[] };
+  times_by_month?: Record<string, unknown>;
+  north_times_by_month?: Record<string, unknown>;
+  south_times_by_month?: Record<string, unknown>;
+  shadow_size?: string;
+}
+
 interface ApiItemsResponse {
   ok: boolean;
-  data?: Item[];
+  data?: ApiItemResponse[];
   error?: string;
 }
 
@@ -59,7 +74,7 @@ export function useAcnhItems({
       const data = await assertJson<ApiItemsResponse>(res);
       if (!data.ok) throw new Error(data.error || "fetch failed");
 
-      const formatted: Item[] = (data.data ?? []).map((item) => ({
+      const formatted: Item[] = (data.data ?? []).map((item): Item => ({
         ...item,
         originalName: item.originalName || item.name_en || item.name,
       }));
