@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Category, Item } from "@/types/acnh";
+import type { Category, Item, TimesByMonthValue } from "@/types/acnh";
 import { assertJson } from "@/lib/utils";
 
 type UseAcnhItemsOpts = {
@@ -21,9 +21,9 @@ interface ApiItemResponse {
   sell_nook?: number;
   north: { months_array: number[] };
   south: { months_array: number[] };
-  times_by_month?: Record<string, unknown>;
-  north_times_by_month?: Record<string, unknown>;
-  south_times_by_month?: Record<string, unknown>;
+  times_by_month?: Record<string, TimesByMonthValue>;
+  north_times_by_month?: Record<string, TimesByMonthValue>;
+  south_times_by_month?: Record<string, TimesByMonthValue>;
   shadow_size?: string;
 }
 
