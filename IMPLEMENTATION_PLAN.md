@@ -8,29 +8,37 @@
 ## Phase 1: 서버 사이드 필터링 이관
 > Spec: `specs/server-side-filtering.md`
 
-- [ ] Task 1.1: API에 `hour` 파라미터 추가
+### 1-A. 시간(hour) 필터 이관
+- [x] Task 1.1: API에 `hour` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: URL 파라미터 파싱 + hoursMask 기반 필터링 로직
+- [ ] Task 1.2: `hour` 필터 클라이언트 교체
+  - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
+  - 변경: 훅에서 hour 전달 + 클라이언트 시간 필터링 제거
 
-- [ ] Task 1.2: API에 `habitat` 파라미터 추가
+### 1-B. 서식지(habitat) 필터 이관
+- [ ] Task 1.3: API에 `habitat` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: location 문자열 → habitat 분류 함수 + 필터링
+- [ ] Task 1.4: `habitat` 필터 클라이언트 교체
+  - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
+  - 변경: 훅에서 habitat 전달 + 클라이언트 서식지 필터링 제거
 
-- [ ] Task 1.3: API에 `search` 파라미터 추가
+### 1-C. 검색(search) 필터 이관
+- [ ] Task 1.5: API에 `search` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: name/originalName 검색 필터링
+- [ ] Task 1.6: `search` 필터 클라이언트 교체
+  - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
+  - 변경: 훅에서 search 전달 + 클라이언트 검색 필터링 제거
 
-- [ ] Task 1.4: API에 `sort` 파라미터 추가
+### 1-D. 정렬(sort) 이관
+- [ ] Task 1.7: API에 `sort` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: 가격 기준 정렬 (priceDesc, priceAsc)
-
-- [ ] Task 1.5: `useAcnhItems` 훅 수정
-  - 파일: `src/hook/useAcnhItems.ts`
-  - 변경: 새 파라미터(hour, habitat, search, sort) 전달
-
-- [ ] Task 1.6: `list/page.tsx` 클라이언트 필터링 제거
-  - 파일: `src/app/list/page.tsx`
-  - 변경: useMemo 필터링 로직 제거, 서버 데이터 직접 사용
+- [ ] Task 1.8: `sort` 클라이언트 교체
+  - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
+  - 변경: 훅에서 sort 전달 + 클라이언트 정렬 제거
   - 주의: 미포획/포획 그룹 정렬은 클라이언트 유지
 
 ---
