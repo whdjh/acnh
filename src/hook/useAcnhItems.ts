@@ -10,6 +10,8 @@ type UseAcnhItemsOpts = {
   hemisphere: "north" | "south";
   /** 월: 1~12, 전체는 0 */
   month: number;
+  /** 시간: 0~23, 월이 0이면 무시됨 */
+  hour?: number;
 };
 
 interface ApiItemResponse {
@@ -38,6 +40,7 @@ export function useAcnhItems({
   category,
   hemisphere,
   month,
+  hour,
 }: UseAcnhItemsOpts) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
@@ -64,6 +67,10 @@ export function useAcnhItems({
       if (!isAll) {
         params.set("month", String(month));
         params.set("only", "1");
+        // 시간 필터도 서버 위임 (월 모드일 때만 의미 있음)
+        if (hour !== undefined && hour >= 0 && hour <= 23) {
+          params.set("hour", String(hour));
+        }
       }
 
       const res = await fetch(`/api/items/${category}?${params.toString()}`, {
@@ -93,7 +100,7 @@ export function useAcnhItems({
     }
 
     return () => ac.abort();
-  }, [enabled, category, hemisphere, month]);
+  }, [enabled, category, hemisphere, month, hour]);
 
   useEffect(() => {
     load();

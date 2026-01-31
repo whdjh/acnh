@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useState } from "react";
 import useQueryTab from "@/hook/useQueryTab";
 import type { Category, Item } from "@/types/acnh";
-import { isAvailableAtHour, formatTimesForMonth } from "@/lib/time";
+import { formatTimesForMonth } from "@/lib/time";
 
 import { useLocalUser } from "@/hook/useLocalUser";
 import { useCaughtItems } from "@/hook/useCaughtItems";
@@ -74,6 +74,7 @@ function ListPageInner() {
     category: activeTab,
     hemisphere: hemi,
     month: selectedMonth,
+    hour: selectedHour,
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -113,12 +114,8 @@ function ListPageInner() {
     return "all";
   };
 
-  // 1차: 월/시간 필터
-  const base = useMemo(() => {
-    return isAll
-      ? items
-      : items.filter((it: Item) => isAvailableAtHour(it, selectedMonth, selectedHour, hemi));
-  }, [items, selectedMonth, selectedHour, hemi, isAll]);
+  // 서버에서 월/시간 필터 완료 → items가 곧 base
+  const base = items;
 
   // 2차: (물고기 탭 한정) 서식지 필터
   const baseWithHabitat = useMemo(() => {
