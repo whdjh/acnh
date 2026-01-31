@@ -33,6 +33,8 @@ export async function GET(
   const hemi: "north" | "south" =
     url.searchParams.get("hemi") === "south" ? "south" : "north";
   const only = url.searchParams.get("only") === "1";
+  const hourParam = url.searchParams.get("hour");
+  const hour = hourParam !== null ? Number(hourParam) : null;
 
   try {
     // 1) 아이템 조회
@@ -69,6 +71,7 @@ export async function GET(
 
     // 3) 아이템별로 북/남반구 month 배열 + times 맵 만들기
     type TimesMap = Record<string, string>; // {"1": "All day" | "NA" | "4 AM – 9 PM" ...}
+    type HoursMaskMap = Record<string, number>; // {"1": hoursMask, ...}
     const byItem: Record<
       number,
       {
@@ -76,6 +79,8 @@ export async function GET(
         southMonths: number[];
         northTimes: TimesMap;
         southTimes: TimesMap;
+        northHoursMask: HoursMaskMap;
+        southHoursMask: HoursMaskMap;
       }
     > = {};
 
@@ -85,6 +90,8 @@ export async function GET(
         southMonths: [],
         northTimes: {},
         southTimes: {},
+        northHoursMask: {},
+        southHoursMask: {},
       };
     }
 
@@ -164,13 +171,15 @@ export async function GET(
       if (av.hemisphere === "north") {
         if (!box.northMonths.includes(m)) box.northMonths.push(m);
         box.northTimes[String(m)] = label;
+        box.northHoursMask[String(m)] = av.hoursMask;
       } else {
         if (!box.southMonths.includes(m)) box.southMonths.push(m);
         box.southTimes[String(m)] = label;
+        box.southHoursMask[String(m)] = av.hoursMask;
       }
     }
 
-    const normalized = items.map((it) => {
+    const normalizedWithId = items.map((it) => {
       const box = byItem[it.id]!;
       // fossil 등 month 개념이 빈 경우를 대비해 보호코드
       const northMonths = box.northMonths.length ? box.northMonths : Array.from({ length: 12 }, (_, i) => i + 1);
@@ -185,6 +194,7 @@ export async function GET(
           : (Object.keys(box.southTimes).length ? box.southTimes : Object.keys(box.northTimes).length ? box.northTimes : undefined);
 
       return {
+        _itemId: it.id, // 내부 필터링용 (응답에서 제거됨)
         originalName: it.originalName,
         name: nameKo,
         image_url: it.imageUrl,
@@ -200,14 +210,28 @@ export async function GET(
     });
 
     // 5) 서버측 월 필터(only=1)
-    const filtered =
+    let filtered =
       only && month >= 1 && month <= 12
-        ? normalized.filter((it) =>
+        ? normalizedWithId.filter((it) =>
           (hemi === "north" ? it.north.months_array : it.south.months_array).includes(month)
         )
-        : normalized;
+        : normalizedWithId;
 
-    return NextResponse.json({ ok: true, data: filtered });
+    // 6) 서버측 시간 필터(hour 파라미터)
+    if (hour !== null && hour >= 0 && hour <= 23 && month >= 1 && month <= 12) {
+      filtered = filtered.filter((it) => {
+        const box = byItem[it._itemId];
+        if (!box) return true;
+        const hoursMaskMap = hemi === "north" ? box.northHoursMask : box.southHoursMask;
+        const mask = hoursMaskMap[String(month)] ?? 0;
+        return (mask & (1 << hour)) !== 0;
+      });
+    }
+
+    // 응답에서 _itemId 제거
+    const data = filtered.map(({ _itemId, ...rest }) => rest);
+
+    return NextResponse.json({ ok: true, data });
   } catch (e) {
     console.error(e);
     return NextResponse.json({ ok: false, error: "Server error" });
