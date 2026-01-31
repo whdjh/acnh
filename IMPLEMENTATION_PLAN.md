@@ -12,7 +12,7 @@
 - [x] Task 1.1: API에 `hour` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: URL 파라미터 파싱 + hoursMask 기반 필터링 로직
-- [ ] Task 1.2: `hour` 필터 클라이언트 교체
+- [x] Task 1.2: `hour` 필터 클라이언트 교체
   - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
   - 변경: 훅에서 hour 전달 + 클라이언트 시간 필터링 제거
 
