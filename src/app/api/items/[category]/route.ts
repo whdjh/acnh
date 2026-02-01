@@ -7,6 +7,46 @@ import { nameKoMap, locationKoMap } from "@/lib/localization";
 const VALID_CATEGORIES = ["fish", "bug", "sea", "fossil"] as const;
 type ValidCategory = (typeof VALID_CATEGORIES)[number];
 
+// 서식지 타입 (물고기 전용)
+type Habitat = "all" | "pond" | "river" | "clifftop" | "riverMouth" | "pier" | "sea";
+const VALID_HABITATS: Habitat[] = ["all", "pond", "river", "clifftop", "riverMouth", "pier", "sea"];
+
+/**
+ * location 문자열을 6가지 서식지 분류로 매핑합니다.
+ * - pond: 연못/호수
+ * - river: 강 일반
+ * - clifftop: 절벽 위 강
+ * - riverMouth: 강 하구
+ * - pier: 부두
+ * - sea: 바다
+ */
+function getHabitat(loc?: string | null): Habitat {
+  if (!loc) return "all";
+  const s = loc.toLowerCase();
+
+  // 부두
+  if (s.includes("pier") || s.includes("부두")) return "pier";
+
+  // 절벽 위 강
+  if (s.includes("clifftop") || s.includes("절벽")) return "clifftop";
+
+  // 강(하구)
+  if (s.includes("mouth") || s.includes("강 하구")) return "riverMouth";
+
+  // 바다
+  if (s.includes("sea") || s.includes("ocean") || s.includes("beach") || s.includes("바다"))
+    return "sea";
+
+  // 연못/호수
+  if (s.includes("pond") || s.includes("lake") || s.includes("연못") || s.includes("호수"))
+    return "pond";
+
+  // 강(일반)
+  if (s.includes("river") || s.includes("강")) return "river";
+
+  return "all";
+}
+
 /**
  * 아이템 목록을 조회하는 API 엔드포인트
  * 
@@ -35,6 +75,8 @@ export async function GET(
   const only = url.searchParams.get("only") === "1";
   const hourParam = url.searchParams.get("hour");
   const hour = hourParam !== null ? Number(hourParam) : null;
+  const habitatParam = url.searchParams.get("habitat") as Habitat | null;
+  const habitat: Habitat = habitatParam && VALID_HABITATS.includes(habitatParam) ? habitatParam : "all";
 
   try {
     // 1) 아이템 조회
@@ -225,6 +267,14 @@ export async function GET(
         const hoursMaskMap = hemi === "north" ? box.northHoursMask : box.southHoursMask;
         const mask = hoursMaskMap[String(month)] ?? 0;
         return (mask & (1 << hour)) !== 0;
+      });
+    }
+
+    // 7) 서버측 서식지 필터(habitat 파라미터, fish 전용)
+    if (category === "fish" && habitat !== "all") {
+      filtered = filtered.filter((it) => {
+        const itemHabitat = getHabitat(it.location);
+        return itemHabitat === habitat;
       });
     }
 
