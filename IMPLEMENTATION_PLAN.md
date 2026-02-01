@@ -28,7 +28,7 @@
 - [x] Task 1.5: API에 `search` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: name/originalName 검색 필터링
-- [ ] Task 1.6: `search` 필터 클라이언트 교체
+- [x] Task 1.6: `search` 필터 클라이언트 교체
   - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
   - 변경: 훅에서 search 전달 + 클라이언트 검색 필터링 제거
 
