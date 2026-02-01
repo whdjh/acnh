@@ -10,15 +10,14 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
-import type { Category } from "@/types/acnh";
-import type { Habitat } from "@/app/list/page";
+import type { Category, Habitat, Hemisphere } from "@/types/acnh";
 
 /**
  * 리스트 헤더 컴포넌트의 Props
  */
 interface ListHeaderProps {
   username: string;
-  hemisphere: "north" | "south";
+  hemisphere: Hemisphere;
   tabs: Category[];
   activeTab: Category;
   onChangeTab: (t: Category) => void;

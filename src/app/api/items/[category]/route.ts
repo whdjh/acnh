@@ -3,12 +3,9 @@ import { db } from "@/lib/db";
 import { acnhItems, acnhAvailability } from "@/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { nameKoMap, locationKoMap } from "@/lib/localization";
+import type { Category, Habitat } from "@/types/acnh";
 
-const VALID_CATEGORIES = ["fish", "bug", "sea", "fossil"] as const;
-type ValidCategory = (typeof VALID_CATEGORIES)[number];
-
-// 서식지 타입 (물고기 전용)
-type Habitat = "all" | "pond" | "river" | "clifftop" | "riverMouth" | "pier" | "sea";
+const VALID_CATEGORIES: Category[] = ["fish", "bug", "sea", "fossil"];
 const VALID_HABITATS: Habitat[] = ["all", "pond", "river", "clifftop", "riverMouth", "pier", "sea"];
 
 /**
@@ -61,7 +58,7 @@ function getHabitat(loc?: string | null): Habitat {
  */
 export async function GET(
   req: Request,
-  ctx: { params: Promise<{ category: ValidCategory }> }
+  ctx: { params: Promise<{ category: Category }> }
 ) {
   const { category } = await ctx.params;
   if (!VALID_CATEGORIES.includes(category)) {

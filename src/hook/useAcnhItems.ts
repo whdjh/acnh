@@ -1,45 +1,31 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Category, Item, TimesByMonthValue } from "@/types/acnh";
+import type {
+  Category,
+  Item,
+  Hemisphere,
+  Habitat,
+  SortKey,
+  ApiItemsResponse,
+} from "@/types/acnh";
 import { assertJson } from "@/lib/utils";
 
 type UseAcnhItemsOpts = {
   enabled: boolean;
   category: Category;
-  hemisphere: "north" | "south";
+  hemisphere: Hemisphere;
   /** 월: 1~12, 전체는 0 */
   month: number;
   /** 시간: 0~23, 월이 0이면 무시됨 */
   hour?: number;
-  /** 서식지 필터 (fish 전용): all, pond, river, clifftop, riverMouth, pier, sea */
-  habitat?: string;
+  /** 서식지 필터 (fish 전용) */
+  habitat?: Habitat;
   /** 검색어 (한글/영어 이름 검색) */
   search?: string;
-  /** 정렬 (priceDesc, priceAsc) */
-  sort?: "priceDesc" | "priceAsc";
+  /** 정렬 */
+  sort?: SortKey;
 };
-
-interface ApiItemResponse {
-  originalName?: string;
-  name: string;
-  name_en?: string;
-  image_url: string;
-  location?: string;
-  sell_nook?: number;
-  north: { months_array: number[] };
-  south: { months_array: number[] };
-  times_by_month?: Record<string, TimesByMonthValue>;
-  north_times_by_month?: Record<string, TimesByMonthValue>;
-  south_times_by_month?: Record<string, TimesByMonthValue>;
-  shadow_size?: string;
-}
-
-interface ApiItemsResponse {
-  ok: boolean;
-  data?: ApiItemResponse[];
-  error?: string;
-}
 
 export function useAcnhItems({
   enabled,

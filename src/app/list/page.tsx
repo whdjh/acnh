@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo, useState } from "react";
 import useQueryTab from "@/hook/useQueryTab";
-import type { Category, Item } from "@/types/acnh";
+import type { Category, Item, SortKey, Habitat, Hemisphere } from "@/types/acnh";
 import { formatTimesForMonth } from "@/lib/time";
 
 import { useLocalUser } from "@/hook/useLocalUser";
@@ -18,25 +18,6 @@ import ListHeaderSkeleton from "@/components/list/ListHeaderSkeleton";
 export const dynamic = "force-dynamic";
 
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"];
-
-// 가격 정렬 키
-type SortKey = "priceDesc" | "priceAsc";
-
-// 서식지(물고기 전용)
-// - pond(연못)
-// - river(강 일반)
-// - clifftop(절벽 위 강)
-// - riverMouth(강 하구)
-// - pier(부두)
-// - sea(바다)
-export type Habitat =
-  | "all"
-  | "pond"
-  | "river"
-  | "clifftop"
-  | "riverMouth"
-  | "pier"
-  | "sea";
 
 function ListPageFallback() {
   return (
@@ -67,7 +48,7 @@ function ListPageInner() {
   // 물고기 탭 전용 서식지 필터 (기본: 전체)
   const [habitat, setHabitat] = useState<Habitat>("all");
 
-  const hemi: "north" | "south" = user?.hemisphere === "south" ? "south" : "north";
+  const hemi: Hemisphere = user?.hemisphere === "south" ? "south" : "north";
 
   const { items, loading: itemsLoading } = useAcnhItems({
     enabled: !!user,

@@ -1,16 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import type { Category } from "@/types/acnh";
+import type { Category, ApiCaughtResponse, ApiToggleResponse } from "@/types/acnh";
 import { assertJson } from "@/lib/utils";
-
-interface ApiCaughtResponse {
-  items?: string[];
-}
-
-interface ApiToggleResponse {
-  caught: boolean;
-}
 
 type UseCaughtItemsOpts = {
   enabled: boolean;
