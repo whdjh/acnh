@@ -17,7 +17,7 @@
   - 변경: 훅에서 hour 전달 + 클라이언트 시간 필터링 제거
 
 ### 1-B. 서식지(habitat) 필터 이관
-- [ ] Task 1.3: API에 `habitat` 파라미터 추가
+- [x] Task 1.3: API에 `habitat` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: location 문자열 → habitat 분류 함수 + 필터링
 - [ ] Task 1.4: `habitat` 필터 클라이언트 교체
@@ -51,17 +51,6 @@
 - [ ] Task 2.3: Server Component 전환 가능한 부분 식별 및 적용
 - [ ] Task 2.4: 이미지 최적화 (sizes, priority 검토)
 - [ ] Task 2.5: 최종 Lighthouse 점수 측정 및 비교
-
----
-
-## Phase 3: 테스트 코드 작성
-> Spec: `specs/test-coverage.md`
-
-- [ ] Task 3.1: Jest 설정 확인/개선
-- [ ] Task 3.2: `lib/time.ts` 테스트 작성
-- [ ] Task 3.3: `lib/localization.ts` 테스트 작성
-- [ ] Task 3.4: API 라우트 테스트 작성
-- [ ] Task 3.5: 커버리지 70% 달성 확인
 
 ---
 
