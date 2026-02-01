@@ -89,7 +89,6 @@ export async function GET(
         imageUrl: acnhItems.imageUrl,
         location: acnhItems.location,
         sellNook: acnhItems.sellNook,
-        raw: acnhItems.raw,
         shadowSize: acnhItems.shadowSize,
       })
       .from(acnhItems)

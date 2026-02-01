@@ -55,9 +55,6 @@ export function useCaughtItems({ enabled, userId, category }: UseCaughtItemsOpts
     } finally {
       if (reqKeyRef.current === myKey) setLoading(false);
     }
-
-    // cleanup에서 abort(의미상; 여기서는 별도 effect가 아니라 직접 호출이므로 생략 가능)
-    return () => ac.abort();
   }, [enabled, userId, category]);
 
   // 마운트/의존성 변경 시 자동 로드
