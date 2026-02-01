@@ -77,6 +77,7 @@ export async function GET(
   const hour = hourParam !== null ? Number(hourParam) : null;
   const habitatParam = url.searchParams.get("habitat") as Habitat | null;
   const habitat: Habitat = habitatParam && VALID_HABITATS.includes(habitatParam) ? habitatParam : "all";
+  const search = url.searchParams.get("search")?.toLowerCase().trim() || "";
 
   try {
     // 1) 아이템 조회
@@ -276,6 +277,14 @@ export async function GET(
         const itemHabitat = getHabitat(it.location);
         return itemHabitat === habitat;
       });
+    }
+
+    // 8) 서버측 검색 필터(search 파라미터)
+    if (search) {
+      filtered = filtered.filter((it) =>
+        it.name.toLowerCase().includes(search) ||
+        it.originalName.toLowerCase().includes(search)
+      );
     }
 
     // 응답에서 _itemId 제거
