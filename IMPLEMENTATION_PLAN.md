@@ -33,7 +33,7 @@
   - 변경: 훅에서 search 전달 + 클라이언트 검색 필터링 제거
 
 ### 1-D. 정렬(sort) 이관
-- [ ] Task 1.7: API에 `sort` 파라미터 추가
+- [x] Task 1.7: API에 `sort` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: 가격 기준 정렬 (priceDesc, priceAsc)
 - [ ] Task 1.8: `sort` 클라이언트 교체
