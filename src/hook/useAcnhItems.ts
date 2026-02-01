@@ -14,6 +14,8 @@ type UseAcnhItemsOpts = {
   hour?: number;
   /** 서식지 필터 (fish 전용): all, pond, river, clifftop, riverMouth, pier, sea */
   habitat?: string;
+  /** 검색어 (한글/영어 이름 검색) */
+  search?: string;
 };
 
 interface ApiItemResponse {
@@ -44,6 +46,7 @@ export function useAcnhItems({
   month,
   hour,
   habitat,
+  search,
 }: UseAcnhItemsOpts) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
@@ -81,6 +84,11 @@ export function useAcnhItems({
         params.set("habitat", habitat);
       }
 
+      // 검색 필터
+      if (search && search.trim()) {
+        params.set("search", search.trim());
+      }
+
       const res = await fetch(`/api/items/${category}?${params.toString()}`, {
         cache: "no-store",
         signal: ac.signal,
@@ -108,7 +116,7 @@ export function useAcnhItems({
     }
 
     return () => ac.abort();
-  }, [enabled, category, hemisphere, month, hour, habitat]);
+  }, [enabled, category, hemisphere, month, hour, habitat, search]);
 
   useEffect(() => {
     load();

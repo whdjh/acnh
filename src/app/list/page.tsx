@@ -76,6 +76,7 @@ function ListPageInner() {
     month: selectedMonth,
     hour: selectedHour,
     habitat: activeTab === "fish" ? habitat : undefined,
+    search,
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -87,24 +88,10 @@ function ListPageInner() {
   const loading = itemsLoading || caughtLoading;
   const isAll = selectedMonth === 0;
 
-  // 서버에서 월/시간/서식지 필터 완료 → items가 곧 base
-  const base = items;
+  // 서버에서 월/시간/서식지/검색 필터 완료 → items가 곧 filtered
+  const filtered = items;
 
-  // 이름만 검색
-  const matchesQuery = (it: Item, q: string) => {
-    if (!q) return true;
-    const needle = q.trim().toLocaleLowerCase("ko-KR");
-    const hay = [it.name, it.originalName].join(" ").toLocaleLowerCase("ko-KR");
-    return hay.includes(needle);
-  };
-
-  // 2차: 검색 필터
-  const filtered = useMemo(() => {
-    if (!base) return [];
-    return base.filter((it: Item) => matchesQuery(it, search));
-  }, [base, search]);
-
-  // 3차: 정렬 – 미포획 그룹 먼저, 같은 그룹 내부에서 가격만 정렬
+  // 정렬 – 미포획 그룹 먼저, 같은 그룹 내부에서 가격만 정렬
   const displayed = useMemo(() => {
     const nameAsc = (a: Item, b: Item) => a.name.localeCompare(b.name, "ko");
     const price = (x: Item) => (typeof x.sell_nook === "number" ? x.sell_nook : null);
