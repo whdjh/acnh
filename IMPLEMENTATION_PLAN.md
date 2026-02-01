@@ -2,6 +2,7 @@
 
 ## 현재 상태
 - Phase 1 완료 ✓
+- Phase 1.5 대기 중 (API 타입 중앙화)
 - Phase 2 대기 중
 
 ---
@@ -41,6 +42,46 @@
   - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
   - 변경: 훅에서 sort 전달 + 클라이언트 정렬 제거
   - 주의: 미포획/포획 그룹 정렬은 클라이언트 유지
+
+---
+
+## Phase 1.5: API 타입 중앙화
+> 모든 API 관련 타입을 `src/types/acnh.ts`에서 관리
+
+### 현재 상태 (타입이 흩어져 있음)
+
+| 파일 | 중복/로컬 타입 |
+|------|---------------|
+| `api/items/[category]/route.ts` | `ValidCategory`, `Habitat` |
+| `hook/useAcnhItems.ts` | `ApiItemResponse`, `ApiItemsResponse` |
+| `hook/useCaughtItems.ts` | `ApiCaughtResponse`, `ApiToggleResponse` |
+| `app/list/page.tsx` | `SortKey`, `Habitat` (중복) |
+
+### 작업 목록
+
+- [ ] Task 1.5.1: 공통 타입 추가
+  - 파일: `src/types/acnh.ts`
+  - 추가: `Habitat`, `SortKey`, `Hemisphere`
+
+- [ ] Task 1.5.2: API 응답 타입 추가
+  - 파일: `src/types/acnh.ts`
+  - 추가: `ApiItemsResponse`, `ApiCaughtResponse`, `ApiToggleResponse`
+
+- [ ] Task 1.5.3: API route에서 타입 import
+  - 파일: `src/app/api/items/[category]/route.ts`
+  - 변경: 로컬 타입 제거, `@/types/acnh`에서 import
+
+- [ ] Task 1.5.4: useAcnhItems 훅에서 타입 import
+  - 파일: `src/hook/useAcnhItems.ts`
+  - 변경: 로컬 `ApiItemResponse`, `ApiItemsResponse` 제거
+
+- [ ] Task 1.5.5: useCaughtItems 훅에서 타입 import
+  - 파일: `src/hook/useCaughtItems.ts`
+  - 변경: 로컬 `ApiCaughtResponse`, `ApiToggleResponse` 제거
+
+- [ ] Task 1.5.6: list/page.tsx에서 타입 import
+  - 파일: `src/app/list/page.tsx`
+  - 변경: 로컬 `SortKey`, `Habitat` 제거
 
 ---
 
