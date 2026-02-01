@@ -36,7 +36,7 @@
 - [x] Task 1.7: API에 `sort` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: 가격 기준 정렬 (priceDesc, priceAsc)
-- [ ] Task 1.8: `sort` 클라이언트 교체
+- [x] Task 1.8: `sort` 클라이언트 교체
   - 파일: `src/hook/useAcnhItems.ts`, `src/app/list/page.tsx`
   - 변경: 훅에서 sort 전달 + 클라이언트 정렬 제거
   - 주의: 미포획/포획 그룹 정렬은 클라이언트 유지
