@@ -75,6 +75,7 @@ function ListPageInner() {
     hemisphere: hemi,
     month: selectedMonth,
     hour: selectedHour,
+    habitat: activeTab === "fish" ? habitat : undefined,
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -86,43 +87,8 @@ function ListPageInner() {
   const loading = itemsLoading || caughtLoading;
   const isAll = selectedMonth === 0;
 
-  // location 원문을 상위 6분류로 매핑
-  const simpleHabitat = (loc?: string | null): Habitat => {
-    if (!loc) return "all";
-    const s = loc.toLowerCase();
-
-    // 부두
-    if (s.includes("pier") || s.includes("부두")) return "pier";
-
-    // 절벽 위 강
-    if (s.includes("clifftop") || s.includes("절벽")) return "clifftop";
-
-    // 강(하구)
-    if (s.includes("mouth") || s.includes("강 하구")) return "riverMouth";
-
-    // 바다
-    if (s.includes("sea") || s.includes("ocean") || s.includes("beach") || s.includes("바다"))
-      return "sea";
-
-    // 연못/호수
-    if (s.includes("pond") || s.includes("lake") || s.includes("연못") || s.includes("호수"))
-      return "pond";
-
-    // 강(일반)
-    if (s.includes("river") || s.includes("강")) return "river";
-
-    return "all";
-  };
-
-  // 서버에서 월/시간 필터 완료 → items가 곧 base
+  // 서버에서 월/시간/서식지 필터 완료 → items가 곧 base
   const base = items;
-
-  // 2차: (물고기 탭 한정) 서식지 필터
-  const baseWithHabitat = useMemo(() => {
-    if (!base) return [];
-    if (activeTab !== "fish" || habitat === "all") return base;
-    return base.filter((it: Item) => simpleHabitat(it.location) === habitat);
-  }, [base, activeTab, habitat]);
 
   // 이름만 검색
   const matchesQuery = (it: Item, q: string) => {
@@ -132,13 +98,13 @@ function ListPageInner() {
     return hay.includes(needle);
   };
 
-  // 3차: 검색 필터
+  // 2차: 검색 필터
   const filtered = useMemo(() => {
-    if (!baseWithHabitat) return [];
-    return baseWithHabitat.filter((it: Item) => matchesQuery(it, search));
-  }, [baseWithHabitat, search]);
+    if (!base) return [];
+    return base.filter((it: Item) => matchesQuery(it, search));
+  }, [base, search]);
 
-  // 4차: 정렬 – 미포획 그룹 먼저, 같은 그룹 내부에서 가격만 정렬
+  // 3차: 정렬 – 미포획 그룹 먼저, 같은 그룹 내부에서 가격만 정렬
   const displayed = useMemo(() => {
     const nameAsc = (a: Item, b: Item) => a.name.localeCompare(b.name, "ko");
     const price = (x: Item) => (typeof x.sell_nook === "number" ? x.sell_nook : null);
