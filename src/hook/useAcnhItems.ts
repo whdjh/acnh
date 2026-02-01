@@ -16,6 +16,8 @@ type UseAcnhItemsOpts = {
   habitat?: string;
   /** 검색어 (한글/영어 이름 검색) */
   search?: string;
+  /** 정렬 (priceDesc, priceAsc) */
+  sort?: "priceDesc" | "priceAsc";
 };
 
 interface ApiItemResponse {
@@ -47,6 +49,7 @@ export function useAcnhItems({
   hour,
   habitat,
   search,
+  sort,
 }: UseAcnhItemsOpts) {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
@@ -89,6 +92,11 @@ export function useAcnhItems({
         params.set("search", search.trim());
       }
 
+      // 정렬
+      if (sort) {
+        params.set("sort", sort);
+      }
+
       const res = await fetch(`/api/items/${category}?${params.toString()}`, {
         cache: "no-store",
         signal: ac.signal,
@@ -116,7 +124,7 @@ export function useAcnhItems({
     }
 
     return () => ac.abort();
-  }, [enabled, category, hemisphere, month, hour, habitat, search]);
+  }, [enabled, category, hemisphere, month, hour, habitat, search, sort]);
 
   useEffect(() => {
     load();

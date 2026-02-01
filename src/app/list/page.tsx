@@ -77,6 +77,7 @@ function ListPageInner() {
     hour: selectedHour,
     habitat: activeTab === "fish" ? habitat : undefined,
     search,
+    sort,
   });
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -91,34 +92,19 @@ function ListPageInner() {
   // 서버에서 월/시간/서식지/검색 필터 완료 → items가 곧 filtered
   const filtered = items;
 
-  // 정렬 – 미포획 그룹 먼저, 같은 그룹 내부에서 가격만 정렬
+  // 정렬 – 미포획 그룹 먼저 (가격 정렬은 서버에서 완료)
+  // stable sort를 위해 index 기반으로 같은 그룹 내 순서 유지
   const displayed = useMemo(() => {
-    const nameAsc = (a: Item, b: Item) => a.name.localeCompare(b.name, "ko");
-    const price = (x: Item) => (typeof x.sell_nook === "number" ? x.sell_nook : null);
-
-    const arr = filtered.slice();
-
-    return arr.sort((a, b) => {
-      const aGroup = caughtSet.has(a.originalName) ? 1 : 0; // 0 미포획, 1 포획
-      const bGroup = caughtSet.has(b.originalName) ? 1 : 0;
+    const indexed = filtered.map((it, i) => ({ it, i }));
+    indexed.sort((a, b) => {
+      const aGroup = caughtSet.has(a.it.originalName) ? 1 : 0; // 0 미포획, 1 포획
+      const bGroup = caughtSet.has(b.it.originalName) ? 1 : 0;
       if (aGroup !== bGroup) return aGroup - bGroup;
-
-      const pa = price(a);
-      const pb = price(b);
-
-      if (pa == null && pb == null) return nameAsc(a, b);
-      if (pa == null) return 1;
-      if (pb == null) return -1;
-
-      if (sort === "priceAsc") {
-        if (pa !== pb) return pa - pb;
-        return nameAsc(a, b);
-      } else {
-        if (pa !== pb) return pb - pa;
-        return nameAsc(a, b);
-      }
+      // 같은 그룹: 서버에서 받은 순서(가격 정렬됨) 유지
+      return a.i - b.i;
     });
-  }, [filtered, caughtSet, sort]);
+    return indexed.map((x) => x.it);
+  }, [filtered, caughtSet]);
 
   // 남은(미포획) 개수 – 현재 필터(월/시간/서식지/검색) 반영
   const remainingCount = useMemo(() => {
