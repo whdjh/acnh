@@ -25,7 +25,7 @@
   - 변경: 훅에서 habitat 전달 + 클라이언트 서식지 필터링 제거
 
 ### 1-C. 검색(search) 필터 이관
-- [ ] Task 1.5: API에 `search` 파라미터 추가
+- [x] Task 1.5: API에 `search` 파라미터 추가
   - 파일: `src/app/api/items/[category]/route.ts`
   - 변경: name/originalName 검색 필터링
 - [ ] Task 1.6: `search` 필터 클라이언트 교체
