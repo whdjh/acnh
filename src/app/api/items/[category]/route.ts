@@ -78,6 +78,9 @@ export async function GET(
   const habitatParam = url.searchParams.get("habitat") as Habitat | null;
   const habitat: Habitat = habitatParam && VALID_HABITATS.includes(habitatParam) ? habitatParam : "all";
   const search = url.searchParams.get("search")?.toLowerCase().trim() || "";
+  const sortParam = url.searchParams.get("sort");
+  const sort: "priceDesc" | "priceAsc" | null =
+    sortParam === "priceAsc" ? "priceAsc" : sortParam === "priceDesc" ? "priceDesc" : null;
 
   try {
     // 1) 아이템 조회
@@ -285,6 +288,28 @@ export async function GET(
         it.name.toLowerCase().includes(search) ||
         it.originalName.toLowerCase().includes(search)
       );
+    }
+
+    // 9) 서버측 정렬(sort 파라미터)
+    // 주의: 미포획/포획 그룹 정렬은 클라이언트에서 수행 (caughtSet 필요)
+    if (sort) {
+      filtered = filtered.slice().sort((a, b) => {
+        const pa = a.sell_nook ?? null;
+        const pb = b.sell_nook ?? null;
+
+        // null 처리: null은 항상 뒤로
+        if (pa === null && pb === null) return a.name.localeCompare(b.name, "ko");
+        if (pa === null) return 1;
+        if (pb === null) return -1;
+
+        if (sort === "priceAsc") {
+          if (pa !== pb) return pa - pb;
+          return a.name.localeCompare(b.name, "ko");
+        } else {
+          if (pa !== pb) return pb - pa;
+          return a.name.localeCompare(b.name, "ko");
+        }
+      });
     }
 
     // 응답에서 _itemId 제거
