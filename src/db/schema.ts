@@ -1,14 +1,14 @@
-import { pgTable, serial, varchar, timestamp, integer, pgEnum, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, serial, varchar, timestamp, integer, pgEnum, uniqueIndex, jsonb } from "drizzle-orm/pg-core"
 
-export const hemisphereEnum = pgEnum("hemisphere", ["north", "south"]);
-export const categoryEnum = pgEnum("category", ["fish", "bug", "sea", "fossil"]);
+export const hemisphereEnum = pgEnum("hemisphere", ["north", "south"])
+export const categoryEnum = pgEnum("category", ["fish", "bug", "sea", "fossil"])
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: varchar("username", { length: 30 }).notNull().unique(),
   hemisphere: hemisphereEnum("hemisphere").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+})
 
 export const caughtItems = pgTable(
   "caught_items",
@@ -24,7 +24,7 @@ export const caughtItems = pgTable(
   (table) => [
     uniqueIndex("user_item_unique").on(table.userId, table.category, table.itemName),
   ]
-);
+)
 
 export const acnhItems = pgTable("acnh_items", {
   id: serial("id").primaryKey(),
@@ -40,7 +40,7 @@ export const acnhItems = pgTable("acnh_items", {
   shadowSize: varchar("shadow_size", { length: 120 }).notNull(),
 }, (t) => [
   uniqueIndex("uniq_cat_name").on(t.category, t.originalName),
-]);
+])
 
 export const acnhAvailability = pgTable("acnh_availability", {
   id: serial("id").primaryKey(),
@@ -50,4 +50,4 @@ export const acnhAvailability = pgTable("acnh_availability", {
   hoursMask: integer("hours_mask").notNull(),
 }, (t) => [
   uniqueIndex("uniq_item_hemi_month").on(t.itemId, t.hemisphere, t.month),
-]);
+])

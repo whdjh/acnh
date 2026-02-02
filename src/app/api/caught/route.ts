@@ -1,32 +1,32 @@
-import { NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
-import { db } from "@/lib/db";
-import { caughtItems, categoryEnum } from "@/db/schema";
+import { NextResponse } from "next/server"
+import { and, eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { caughtItems, categoryEnum } from "@/db/schema"
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const runtime = "nodejs"
+export const dynamic = "force-dynamic"
+export const revalidate = 0
 
-type Category = (typeof categoryEnum.enumValues)[number];
+type Category = (typeof categoryEnum.enumValues)[number]
 function isCategory(v: unknown): v is Category {
-  return typeof v === "string" && (categoryEnum.enumValues as readonly string[]).includes(v);
+  return typeof v === "string" && (categoryEnum.enumValues as readonly string[]).includes(v)
 }
 
 // GET /api/caught?userId=123&category=fish
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userIdStr = searchParams.get("userId");
-    const categoryStr = searchParams.get("category");
+    const { searchParams } = new URL(req.url)
+    const userIdStr = searchParams.get("userId")
+    const categoryStr = searchParams.get("category")
 
-    const userId = Number(userIdStr);
+    const userId = Number(userIdStr)
     if (!userIdStr || Number.isNaN(userId)) {
-      return NextResponse.json({ ok: false, error: "Invalid userId" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Invalid userId" }, { status: 400 })
     }
     if (!isCategory(categoryStr)) {
-      return NextResponse.json({ ok: false, error: "Invalid category" }, { status: 400 });
+      return NextResponse.json({ ok: false, error: "Invalid category" }, { status: 400 })
     }
-    const category: Category = categoryStr;
+    const category: Category = categoryStr
 
     const rows = await db
       .select({ itemName: caughtItems.itemName })
@@ -34,13 +34,13 @@ export async function GET(req: Request) {
       .where(and(
         eq(caughtItems.userId, userId),
         eq(caughtItems.category, category)
-      ));
+      ))
 
     return NextResponse.json({ ok: true, items: rows.map(r => r.itemName) }, {
       headers: { "Cache-Control": "no-store" },
-    });
+    })
   } catch (e) {
-    console.error("GET /api/caught error:", e);
-    return NextResponse.json({ ok: false, error: "Internal error" }, { status: 500 });
+    console.error("GET /api/caught error:", e)
+    return NextResponse.json({ ok: false, error: "Internal error" }, { status: 500 })
   }
 }

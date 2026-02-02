@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ItemsGridSkeleton({ count = 9 }: { count?: number }) {
   return (
@@ -24,5 +24,5 @@ export default function ItemsGridSkeleton({ count = 9 }: { count?: number }) {
         </Card>
       ))}
     </div>
-  );
+  )
 }

@@ -10,4 +10,4 @@ module.exports = {
     await config.transform(config, '/brand/tamsldogam'),
     await config.transform(config, '/list'),
   ],
-};
+}

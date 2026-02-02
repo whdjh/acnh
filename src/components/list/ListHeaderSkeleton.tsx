@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function ListHeaderSkeleton() {
   return (
@@ -20,5 +20,5 @@ export default function ListHeaderSkeleton() {
         <Skeleton className="h-8 w-16" />
       </div>
     </header>
-  );
+  )
 }

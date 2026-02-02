@@ -2,7 +2,7 @@
 // The added config here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-import * as Sentry from "@sentry/nextjs";
+import * as Sentry from "@sentry/nextjs"
 
 Sentry.init({
   dsn: "https://a99eaeb7111b6bbadc5ed0eb16a24895@o4510194511446016.ingest.us.sentry.io/4510194520752128",
@@ -51,11 +51,11 @@ Sentry.init({
 
   // Filter errors before sending to Sentry
   beforeSend(event, hint) {
-    const error = hint.originalException || hint.syntheticException;
+    const error = hint.originalException || hint.syntheticException
     const errorMessage =
       (error instanceof Error ? error.message : String(error || "")) ||
       event.message ||
-      "";
+      ""
 
     // Ignore browser extension related errors
     if (
@@ -87,6 +87,6 @@ Sentry.init({
 
     return event; // Send other errors normally
   },
-});
+})
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart

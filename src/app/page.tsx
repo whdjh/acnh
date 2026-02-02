@@ -1,23 +1,23 @@
-"use client";
+"use client"
 
-import { useState, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useCallback } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 
-type Mode = "login" | "signup";
-type Hemisphere = "north" | "south";
+type Mode = "login" | "signup"
+type Hemisphere = "north" | "south"
 
 interface AdItem {
-  href: string;
-  src: string;
-  alt: string;
+  href: string
+  src: string
+  alt: string
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -39,7 +39,7 @@ const TOP_ADS: AdItem[] = [
     src: "https://image8.coupangcdn.com/image/affiliate/banner/995ba842cae0de3f8ffb0c4d46f4d68c@2x.jpg",
     alt: "닌텐도 스위치 모여봐요 동물의 숲 한국어",
   },
-];
+]
 
 const BOTTOM_ADS: AdItem[] = [
   {
@@ -57,10 +57,10 @@ const BOTTOM_ADS: AdItem[] = [
     src: "https://img4c.coupangcdn.com/image/affiliate/banner/02c77137d92856147c98a23d68baa78a@2x.jpg",
     alt: "모동숲 해피홈 파라다이스 DLC",
   },
-];
+]
 
 // 하단에 6개 표시
-const ALL_ADS: AdItem[] = [...TOP_ADS, ...BOTTOM_ADS];
+const ALL_ADS: AdItem[] = [...TOP_ADS, ...BOTTOM_ADS]
 
 // ─────────────────────────────────────────────────────────────
 // 6열 광고 그리드 (맨 하단)
@@ -87,49 +87,49 @@ function AdGrid6({ items }: { items: AdItem[] }) {
         </a>
       ))}
     </div>
-  );
+  )
 }
 
 export default function HomePage() {
-  const [mode, setMode] = useState<Mode>("login");
-  const [username, setUsername] = useState("");
-  const [hemisphere, setHemisphere] = useState<Hemisphere>("north");
-  const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<Mode>("login")
+  const [username, setUsername] = useState("")
+  const [hemisphere, setHemisphere] = useState<Hemisphere>("north")
+  const [loading, setLoading] = useState(false)
 
   const handleSubmit = useCallback(async () => {
-    const trimmed = username.trim();
-    if (!trimmed) return;
-    setLoading(true);
+    const trimmed = username.trim()
+    if (!trimmed) return
+    setLoading(true)
 
-    const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-    const body = mode === "login" ? { username: trimmed } : { username: trimmed, hemisphere };
+    const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/signup"
+    const body = mode === "login" ? { username: trimmed } : { username: trimmed, hemisphere }
 
     try {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-      });
-      const data = await res.json();
+      })
+      const data = await res.json()
 
       if (!data.ok) {
-        setLoading(false);
-        return;
+        setLoading(false)
+        return
       }
-      localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "/list";
+      localStorage.setItem("user", JSON.stringify(data.user))
+      window.location.href = "/list"
     } catch (err) {
-      console.error(err);
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [username, hemisphere, mode]);
+  }, [username, hemisphere, mode])
   const onKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (e) => {
     if (e.key === "Enter") {
-      e.preventDefault();
-      void handleSubmit();
+      e.preventDefault()
+      void handleSubmit()
     }
-  };
+  }
   return (
     // 상단 공지, 중앙 카드, 하단 광고(6열)
     <div className="min-h-[calc(100dvh-4rem)] flex flex-col">
@@ -198,5 +198,5 @@ export default function HomePage() {
         <AdGrid6 items={ALL_ADS} />
       </footer>
     </div>
-  );
+  )
 }

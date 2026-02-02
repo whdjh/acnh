@@ -12,10 +12,10 @@ export function cn(...inputs: ClassValue[]) {
  * @throws JSON 형식이 아닌 경우 Error를 throw합니다.
  */
 export async function assertJson<T = unknown>(res: Response): Promise<T> {
-  const ct = res.headers.get("content-type") || "";
+  const ct = res.headers.get("content-type") || ""
   if (!ct.includes("application/json")) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Expected JSON, got ${ct}. ${text.slice(0, 160)}`);
+    const text = await res.text().catch(() => "")
+    throw new Error(`Expected JSON, got ${ct}. ${text.slice(0, 160)}`)
   }
-  return res.json();
+  return res.json()
 }

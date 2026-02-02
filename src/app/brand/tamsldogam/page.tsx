@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata } from "next"
 
-const BASE = "https://acnh-gules.vercel.app";
+const BASE = "https://acnh-gules.vercel.app"
 
 export const metadata: Metadata = {
   title: "탐슬도감(TamslDogam) — 모동숲 도감 웹앱",
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
       "이름·월·시간·반구 한 번에 필터되는 모동숲 도감 웹앱. 모바일 최적화, 잡은 항목 정리 지원.",
     images: [`${BASE}/og-image.png`],
   },
-};
+}
 
 export default function Page() {
   const orgJsonLd = {
@@ -36,7 +36,7 @@ export default function Page() {
     sameAs: [
       "https://github.com/whdjh/acnh",
     ],
-  };
+  }
 
   const siteJsonLd = {
     "@context": "https://schema.org",
@@ -48,7 +48,7 @@ export default function Page() {
       target: `${BASE}/search?q={search_term_string}`,
       "query-input": "required name=search_term_string",
     },
-  };
+  }
 
   const faqJsonLd = {
     "@context": "https://schema.org",
@@ -80,7 +80,7 @@ export default function Page() {
         },
       },
     ],
-  };
+  }
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-12">
@@ -112,5 +112,5 @@ export default function Page() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
     </main>
-  );
+  )
 }

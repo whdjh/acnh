@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
-import Script from "next/script";
-import { Suspense } from "react";
-import "../styles/globals.css";
-import GtmRouteListener from "./_gtm-route-listener";
+import type { Metadata } from "next"
+import Script from "next/script"
+import { Suspense } from "react"
+import "../styles/globals.css"
+import GtmRouteListener from "./_gtm-route-listener"
 
-const GTM_ID = "GTM-KPHJDQX5";
+const GTM_ID = "GTM-KPHJDQX5"
 const GTM_SCRIPT = `
   (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','${GTM_ID}');
-`;
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f)
+  })(window,document,'script','dataLayer','${GTM_ID}')
+`
 
 export const metadata: Metadata = {
   title: "탐슬도감",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
   verification: {
     google: "7W8K5jynjR_b8gTwxRgXVv2AtuGKcecspbj75-ftjgc",
   },
-};
+}
 
 export default function RootLayout({
   children,
@@ -97,5 +97,5 @@ export default function RootLayout({
         <div className="relative z-10">{children}</div>
       </body>
     </html>
-  );
+  )
 }

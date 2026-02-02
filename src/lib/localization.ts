@@ -271,7 +271,7 @@ export const nameKoMap: Record<string, string> = {
   "tricera skull": "트리케라톱스 두개골",
   "tricera tail": "트리케라톱스 꼬리",
   "tricera torso": "트리케라톱스 몸통",
-};
+}
 
 // ======================================================================
 // 📍 위치 번역 매핑
@@ -315,4 +315,4 @@ export const locationKoMap: Record<string, string> = {
   "Shaking non-fruit hardwood trees or cedar trees": "열매 없는 나무나 삼나무 흔들기",
   "On beach rocks": "해변 바위 위",
   "Museum": "박물관",
-};
+}

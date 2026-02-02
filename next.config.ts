@@ -1,5 +1,5 @@
-import { withSentryConfig } from '@sentry/nextjs';
-import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs'
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   async redirects() {
@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
         destination: '/brand/tamsldogam',
         permanent: true, // 301
       },
-    ];
+    ]
   },
   images: {
     remotePatterns: [
@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
     // 이미지 최적화 및 캐싱 설정
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1년 (최대 캐시 시간)
   },
-};
+}
 
 export default withSentryConfig(nextConfig, {
   // For all available options, see:
@@ -55,4 +55,4 @@ export default withSentryConfig(nextConfig, {
   // https://docs.sentry.io/product/crons/
   // https://vercel.com/docs/cron-jobs
   automaticVercelMonitors: true,
-});
+})

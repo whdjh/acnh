@@ -1,40 +1,40 @@
-"use client";
+"use client"
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
-import type { Category, Habitat, Hemisphere } from "@/types/acnh";
+} from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import { X } from "lucide-react"
+import type { Category, Habitat, Hemisphere } from "@/types/acnh"
 
 /**
  * 리스트 헤더 컴포넌트의 Props
  */
 interface ListHeaderProps {
-  username: string;
-  hemisphere: Hemisphere;
-  tabs: Category[];
-  activeTab: Category;
-  onChangeTab: (t: Category) => void;
-  selectedMonth: number;
-  onChangeMonth: (m: number) => void;
-  selectedHour: number;
-  onChangeHour: (h: number) => void;
-  counts?: Partial<Record<Category, number>>;
-  searchTerm: string;
-  onChangeSearch: (v: string) => void;
-  sort: "priceDesc" | "priceAsc";
-  onChangeSort: (v: "priceDesc" | "priceAsc") => void;
+  username: string
+  hemisphere: Hemisphere
+  tabs: Category[]
+  activeTab: Category
+  onChangeTab: (t: Category) => void
+  selectedMonth: number
+  onChangeMonth: (m: number) => void
+  selectedHour: number
+  onChangeHour: (h: number) => void
+  counts?: Partial<Record<Category, number>>
+  searchTerm: string
+  onChangeSearch: (v: string) => void
+  sort: "priceDesc" | "priceAsc"
+  onChangeSort: (v: "priceDesc" | "priceAsc") => void
 
   /** 물고기 전용 서식지 필터 (물고기 카테고리에서만 사용) */
-  habitat: Habitat;
+  habitat: Habitat
   /** 서식지 변경 핸들러 */
-  onChangeHabitat: (v: Habitat) => void;
+  onChangeHabitat: (v: Habitat) => void
 }
 
 /**
@@ -162,10 +162,10 @@ export default function ListHeader({
       {/* 네 번째 줄: 상단 탭(물고기/곤충/해양생물/화석) */}
       <div className="flex gap-2 flex-wrap">
         {tabs.map((tab) => {
-          const selected = activeTab === tab;
+          const selected = activeTab === tab
           const label =
-            tab === "fish" ? "물고기" : tab === "bug" ? "곤충" : tab === "sea" ? "해양생물" : "화석";
-          const count = counts?.[tab];
+            tab === "fish" ? "물고기" : tab === "bug" ? "곤충" : tab === "sea" ? "해양생물" : "화석"
+          const count = counts?.[tab]
 
           return (
             <Button
@@ -186,7 +186,7 @@ export default function ListHeader({
                 </span>
               )}
             </Button>
-          );
+          )
         })}
       </div>
 
@@ -202,7 +202,7 @@ export default function ListHeader({
             { key: "pier", label: "부두" },
             { key: "sea", label: "바다" },
           ].map(({ key, label }) => {
-            const selected = habitat === (key as Habitat);
+            const selected = habitat === (key as Habitat)
             return (
               <Button
                 key={key}
@@ -212,10 +212,10 @@ export default function ListHeader({
               >
                 {label}
               </Button>
-            );
+            )
           })}
         </div>
       )}
     </header>
-  );
+  )
 }
