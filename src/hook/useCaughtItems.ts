@@ -4,13 +4,15 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import type { Category, ApiCaughtResponse, ApiToggleResponse } from "@/types/acnh";
 import { assertJson } from "@/lib/utils";
 
-type UseCaughtItemsOpts = {
+export function useCaughtItems({
+  enabled,
+  userId,
+  category,
+}: {
   enabled: boolean;
   userId?: number;
   category: Category;
-};
-
-export function useCaughtItems({ enabled, userId, category }: UseCaughtItemsOpts) {
+}) {
   const [caughtSet, setCaughtSet] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export function useCaughtItems({ enabled, userId, category }: UseCaughtItemsOpts
       if (reqKeyRef.current === myKey) {
         setCaughtSet(new Set(data.items ?? []));
       }
-    } catch (e: unknown) {
+    } catch (e) {
       if (e instanceof Error && e.name !== "AbortError") {
         console.error("GET /api/caught failed:", e);
         if (reqKeyRef.current === myKey) {
@@ -112,7 +114,6 @@ export function useCaughtItems({ enabled, userId, category }: UseCaughtItemsOpts
           else next.add(itemName);
           return next;
         });
-        alert("상태 변경에 실패했습니다.");
       }
     },
     [userId, category]

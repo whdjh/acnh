@@ -113,7 +113,6 @@ export default function HomePage() {
       const data = await res.json();
 
       if (!data.ok) {
-        alert(data.error || (mode === "login" ? "로그인 실패" : "회원가입 실패"));
         setLoading(false);
         return;
       }
@@ -121,7 +120,6 @@ export default function HomePage() {
       window.location.href = "/list";
     } catch (err) {
       console.error(err);
-      alert("서버 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }

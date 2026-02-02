@@ -97,7 +97,7 @@ export function useAcnhItems({
       }));
 
       if (reqKeyRef.current === myKey) setItems(formatted);
-    } catch (e: unknown) {
+    } catch (e) {
       if (e instanceof Error && e.name !== "AbortError") {
         console.error("GET /api/items failed:", e);
         if (reqKeyRef.current === myKey) {

@@ -44,9 +44,7 @@ function ListPageInner() {
   const [selectedHour, setSelectedHour] = useState<number>(new Date().getHours());
   const [search, setSearch] = useState<string>("");
   const [sort, setSort] = useState<SortKey>("priceDesc");
-
-  // 물고기 탭 전용 서식지 필터 (기본: 전체)
-  const [habitat, setHabitat] = useState<Habitat>("all");
+  const [habitat, setHabitat] = useState<Habitat>("all"); // 물고기 탭 전용 서식지 필터 (기본: 전체)
 
   const hemi: Hemisphere = user?.hemisphere === "south" ? "south" : "north";
 
@@ -92,8 +90,6 @@ function ListPageInner() {
     return filtered.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0);
   }, [filtered, caughtSet]);
 
-  if (!user) return null;
-
   return (
     <div className="p-4">
       {loading ? (
@@ -104,29 +100,25 @@ function ListPageInner() {
       ) : (
         <>
           <ListHeader
-            username={user.username}
+            username={user?.username ?? ""}
             hemisphere={hemi}
             tabs={CATEGORY_TABS}
             activeTab={activeTab}
             onChangeTab={(t) => {
               setTab(t);
-              // 물고기 외 탭으로 넘어갈 때 의미 없으므로 리셋
-              setHabitat("all");
+              setHabitat("all");  // 물고기 외 탭으로 넘어갈 때 의미 없으므로 리셋
             }}
             selectedMonth={selectedMonth}
             onChangeMonth={setSelectedMonth}
             selectedHour={selectedHour}
             onChangeHour={setSelectedHour}
             counts={{ [activeTab]: remainingCount }}
-            // 검색
-            searchTerm={search}
-            onChangeSearch={setSearch}
-            // 정렬
-            sort={sort}
-            onChangeSort={setSort}
-            // 서식지 (물고기 전용)
-            habitat={habitat}
-            onChangeHabitat={setHabitat}
+            searchTerm={search} // 검색
+            onChangeSearch={setSearch} // 검색
+            sort={sort} // 정렬
+            onChangeSort={setSort} // 정렬
+            habitat={habitat} // 서식지 (물고기 전용)
+            onChangeHabitat={setHabitat} // 서식지 (물고기 전용)
           />
 
           {displayed.length === 0 ? (

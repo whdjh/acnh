@@ -1,6 +1,7 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 
+// 쿼리 파라미터에서 탭 정보를 관리하는 훅
 export default function useQueryTab<T extends string>(
   key: string,
   defaultValue: T,
