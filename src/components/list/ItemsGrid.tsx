@@ -35,9 +35,9 @@ export default function ItemsGrid({
       {items.map((item, index) => {
         const isCaught = caughtSet.has(item.originalName)
         const timesText = timesFor(item)
-        // 첫 번째 이미지에 priority 적용 (LCP 최적화)
-        // Largest Contentful Paint를 개선하기 위해 첫 번째 이미지를 우선 로드합니다
-        const isLcpImage = index === 0
+        // 첫 6개 이미지에 priority 적용 (LCP 최적화)
+        // 3열 그리드에서 화면에 보이는 첫 2행을 우선 로드합니다
+        const isLcpImage = index < 6
 
         return (
           <Card
@@ -60,7 +60,7 @@ export default function ItemsGrid({
                     "object-contain transition",
                     isCaught && "opacity-70"
                   )}
-                  sizes="(max-width: 768px) 33vw, 200px"
+                  sizes="(max-width: 640px) 30vw, (max-width: 768px) 25vw, 200px"
                   priority={isLcpImage}
                 />
               </div>
