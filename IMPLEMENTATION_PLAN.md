@@ -68,9 +68,10 @@
   - ~~font display: swap~~ → 이미 적용되어 있음
   - ~~불필요한 클라이언트 코드 제거~~ → 해당 없음
   - ~~React Query staleTime~~ → React Query 미사용
-- [ ] Task 2.4: 성능 측정 및 비교
-  - Lighthouse 측정 (홈, 도감)
-  - Baseline 대비 비교
+- [x] Task 2.4: 성능 측정 및 비교 ✓
+  - Lighthouse 측정 (홈, 도감) - 완료
+  - Baseline 대비 비교 - 완료
+  - 결과: specs/lighthouse-optimization.md "최종 점수" 섹션 참조
 
 ---
 
