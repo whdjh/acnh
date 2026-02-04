@@ -121,3 +121,57 @@ pnpm build
 pnpm start
 # Chrome DevTools > Lighthouse > Generate report
 ```
+
+---
+
+## 최종 점수 (2026-02-04)
+
+### 홈페이지 (/)
+| 카테고리 | Baseline | 최종 | 변화 |
+|---------|----------|------|------|
+| Performance | 77 | **78** | +1 |
+| Accessibility | 95 | 95 | - |
+| Best Practices | 100 | 100 | - |
+| SEO | 100 | 100 | - |
+
+**Core Web Vitals:**
+| 지표 | Baseline | 최종 | 변화 |
+|------|----------|------|------|
+| FCP | 2.0s | 2.0s | - |
+| LCP | 5.1s | **4.8s** | -0.3s ✓ |
+| TBT | 190ms | 208ms | +18ms |
+| CLS | 0 | 0 | - |
+| SI | 2.0s | 2.0s | - |
+
+### 도감 페이지 (/list)
+| 카테고리 | Baseline | 최종 | 변화 |
+|---------|----------|------|------|
+| Performance | 78 | 77 | -1 |
+| Accessibility | 95 | 95 | - |
+| Best Practices | 100 | 100 | - |
+| SEO | 100 | 100 | - |
+
+**Core Web Vitals:**
+| 지표 | Baseline | 최종 | 변화 |
+|------|----------|------|------|
+| FCP | 2.0s | 2.0s | - |
+| LCP | 5.0s | 5.0s | - |
+| TBT | 160ms | 208ms | +48ms |
+| CLS | 0 | 0.0009 | - |
+| SI | 2.1s | **2.0s** | -0.1s ✓ |
+
+### 번들 크기 비교
+| 페이지 | Baseline | 최종 | 변화 |
+|--------|----------|------|------|
+| `/` First Load | 256 kB | 256 kB | - |
+| `/list` First Load | 264 kB | 264 kB | - |
+
+### 결론
+- **Performance 점수**: 홈페이지 +1점 개선, 도감페이지 유지 (오차 범위)
+- **LCP 개선**: 홈페이지 5.1s → 4.8s (300ms 개선)
+- **번들 크기**: 변동 없음 (구조적 최적화, 실제 크기 감소는 미미)
+- **적용된 최적화**:
+  1. 도감 페이지 Server Component 전환 (`list/page.tsx`)
+  2. 이미지 최적화 (`priority` 확장, `sizes` 개선)
+
+> 참고: Lighthouse 점수는 네트워크/시스템 상태에 따라 변동이 있을 수 있음
