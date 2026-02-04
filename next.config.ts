@@ -15,8 +15,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'dodo.ac',
-        pathname: '/**',
+        hostname: '*.supabase.co',
+        pathname: '/storage/v1/object/public/**',
       },
     ],
     // 이미지 최적화 및 캐싱 설정

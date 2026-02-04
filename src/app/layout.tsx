@@ -60,9 +60,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {/* 이미지 CDN preconnect - LCP 최적화 */}
-        <link rel="preconnect" href="https://dodo.ac" />
-        <link rel="dns-prefetch" href="https://dodo.ac" />
+        {/* Supabase Storage preconnect - LCP 최적화 */}
+        <link rel="preconnect" href="https://bzaoskrynsvcyyvalhvw.supabase.co" />
+        <link rel="dns-prefetch" href="https://bzaoskrynsvcyyvalhvw.supabase.co" />
         {/* 폰트 preload - Critical request chain 최적화 */}
         <link
           rel="preload"
