@@ -3,7 +3,7 @@
 ## 현재 상태
 - Phase 1 완료 ✓
 - Phase 1.5 완료 ✓ (API 타입 중앙화)
-- Phase 2 완료 ✓ (Lighthouse 최적화)
+- Phase 2 진행 중 (Lighthouse 최적화)
 
 ---
 
@@ -57,11 +57,20 @@
 ## Phase 2: Lighthouse 최적화
 > Spec: `specs/lighthouse-optimization.md`
 
+### 완료된 분석
 - [x] Task 2.1: 현재 Lighthouse 점수 측정 및 기록
 - [x] Task 2.2: 번들 분석 및 최적화 포인트 파악
-- [x] Task 2.3: Server Component 전환 가능한 부분 식별 및 적용
-- [x] Task 2.4: 이미지 최적화 (sizes, priority 검토)
-- [x] Task 2.5: 최종 Lighthouse 점수 측정 및 비교
+
+### 최적화 시도
+- [x] Task 2.3: 최적화 적용
+  - ~~dynamic import~~ → 해당 없음 (이미 Server Component + Suspense 패턴)
+  - preconnect 힌트 추가 (dodo.ac 이미지 CDN) ✓
+  - ~~font display: swap~~ → 이미 적용되어 있음
+  - ~~불필요한 클라이언트 코드 제거~~ → 해당 없음
+  - ~~React Query staleTime~~ → React Query 미사용
+- [ ] Task 2.4: 성능 측정 및 비교
+  - Lighthouse 측정 (홈, 도감)
+  - Baseline 대비 비교
 
 ---
 
