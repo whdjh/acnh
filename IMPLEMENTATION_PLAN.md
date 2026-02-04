@@ -3,7 +3,7 @@
 ## 현재 상태
 - Phase 1 완료 ✓
 - Phase 1.5 완료 ✓ (API 타입 중앙화)
-- Phase 2 대기 중
+- Phase 2 완료 ✓ (Lighthouse 최적화)
 
 ---
 
@@ -61,7 +61,7 @@
 - [x] Task 2.2: 번들 분석 및 최적화 포인트 파악
 - [x] Task 2.3: Server Component 전환 가능한 부분 식별 및 적용
 - [x] Task 2.4: 이미지 최적화 (sizes, priority 검토)
-- [ ] Task 2.5: 최종 Lighthouse 점수 측정 및 비교
+- [x] Task 2.5: 최종 Lighthouse 점수 측정 및 비교
 
 ---
 
