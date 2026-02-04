@@ -59,7 +59,7 @@
 
 - [x] Task 2.1: 현재 Lighthouse 점수 측정 및 기록
 - [x] Task 2.2: 번들 분석 및 최적화 포인트 파악
-- [ ] Task 2.3: Server Component 전환 가능한 부분 식별 및 적용
+- [x] Task 2.3: Server Component 전환 가능한 부분 식별 및 적용
 - [ ] Task 2.4: 이미지 최적화 (sizes, priority 검토)
 - [ ] Task 2.5: 최종 Lighthouse 점수 측정 및 비교
 

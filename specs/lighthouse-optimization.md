@@ -65,8 +65,9 @@ Lighthouse Performance 점수 개선
 
 ### Client Component 현황 (13개 파일)
 ```
-src/app/page.tsx              # 홈 페이지 전체
-src/app/list/page.tsx         # 도감 페이지 전체
+src/app/page.tsx                          # 홈 페이지 전체
+src/app/list/page.tsx                     # ✓ Server Component로 전환 완료
+src/components/list/ListPageContent.tsx   # 도감 페이지 로직 (Client)
 src/components/list/ItemsGrid.tsx
 src/components/list/ItemsGridSkeleton.tsx
 src/components/list/ListHeader.tsx
