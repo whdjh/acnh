@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { acnhItems, acnhAvailability } from "@/db/schema"
 import { eq, inArray } from "drizzle-orm"
-import { nameKoMap, locationKoMap } from "@/lib/localization"
+import { nameKoMap, locationKoMap, nameEnMap, locationEnMap } from "@/lib/localization"
 import type { Category, Habitat } from "@/types/acnh"
 
 const VALID_CATEGORIES: Category[] = ["fish", "bug", "sea", "fossil"]
@@ -173,10 +173,13 @@ export async function GET(
       const southMonths = box.southMonths.length ? box.southMonths : Array.from({ length: 12 }, (_, i) => i + 1)
 
       const nameKo = it.nameKo || nameKoMap[it.originalName] || it.originalName
-      const name = isEn ? it.originalName : nameKo
+      const name = isEn
+        ? (nameEnMap[it.nameKo || ""] || it.originalName)
+        : nameKo
+      const rawLoc = it.location || ""
       const location = isEn
-        ? (it.location || "Unknown")
-        : (locationKoMap[it.location || ""] || it.location || "알 수 없음")
+        ? (locationEnMap[rawLoc] || rawLoc || "Unknown")
+        : (locationKoMap[rawLoc] || rawLoc || "알 수 없음")
 
       const commonTimes =
         hemi === "north"

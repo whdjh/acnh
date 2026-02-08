@@ -316,3 +316,13 @@ export const locationKoMap: Record<string, string> = {
   "On beach rocks": "해변 바위 위",
   "Museum": "박물관",
 }
+
+// 한국어 → 영어 역매핑 (DB에 한국어가 저장된 경우 대비)
+export const locationEnMap: Record<string, string> = Object.fromEntries(
+  Object.entries(locationKoMap).map(([en, ko]) => [ko, en])
+)
+
+// 영어 → 한국어 이름 역매핑
+export const nameEnMap: Record<string, string> = Object.fromEntries(
+  Object.entries(nameKoMap).map(([en, ko]) => [ko, en])
+)
