@@ -2,9 +2,8 @@ import type { Item } from "@/types/acnh"
 
 function compressHourList(hours: number[], locale: string): string {
   const uniq = Array.from(new Set(hours)).sort((a, b) => a - b)
-  const isEn = locale === "en"
-  if (uniq.length === 24) return isEn ? "All day" : "종일"
-  if (uniq.length === 0) return isEn ? "None" : "없음"
+  if (uniq.length === 24) return locale === "en" ? "All day" : locale === "ja" ? "終日" : "종일"
+  if (uniq.length === 0) return locale === "en" ? "None" : locale === "ja" ? "なし" : "없음"
 
   const ranges: Array<[number, number]> = []
   let s = uniq[0],
@@ -20,7 +19,7 @@ function compressHourList(hours: number[], locale: string): string {
   }
   ranges.push([s, prev])
 
-  const hourSuffix = isEn ? ":00" : "시"
+  const hourSuffix = locale === "en" ? ":00" : locale === "ja" ? "時" : "시"
 
   return ranges
     .map(([a, b]) =>
@@ -50,10 +49,9 @@ export function formatTimesForMonth(
   hemi: "north" | "south",
   locale: string = "ko"
 ): string {
-  const isEn = locale === "en"
-  const noInfo = isEn ? "No info" : "정보 없음"
-  const allDay = isEn ? "All day" : "종일"
-  const hourSuffix = isEn ? ":00" : "시"
+  const noInfo = locale === "en" ? "No info" : locale === "ja" ? "情報なし" : "정보 없음"
+  const allDay = locale === "en" ? "All day" : locale === "ja" ? "終日" : "종일"
+  const hourSuffix = locale === "en" ? ":00" : locale === "ja" ? "時" : "시"
 
   const key = String(month)
   const val =

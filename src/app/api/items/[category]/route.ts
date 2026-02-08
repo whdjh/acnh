@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { acnhItems, acnhAvailability } from "@/db/schema"
 import { eq, inArray } from "drizzle-orm"
-import { nameKoMap, locationKoMap, nameEnMap, locationEnMap, getLocalizedShadowSize } from "@/lib/localization"
+import { nameKoMap, getLocalizedShadowSize, getLocalizedLocation, getLocalizedName } from "@/lib/localization"
 import type { Category, Habitat } from "@/types/acnh"
 
 const VALID_CATEGORIES: Category[] = ["fish", "bug", "sea", "fossil"]
@@ -47,7 +47,6 @@ export async function GET(
   const sort: "priceDesc" | "priceAsc" | null =
     sortParam === "priceAsc" ? "priceAsc" : sortParam === "priceDesc" ? "priceDesc" : null
   const locale = url.searchParams.get("locale") || "ko"
-  const isEn = locale === "en"
 
   try {
     const items = await db
@@ -173,13 +172,9 @@ export async function GET(
       const southMonths = box.southMonths.length ? box.southMonths : Array.from({ length: 12 }, (_, i) => i + 1)
 
       const nameKo = it.nameKo || nameKoMap[it.originalName] || it.originalName
-      const name = isEn
-        ? (nameEnMap[it.nameKo || ""] || it.originalName)
-        : nameKo
+      const name = getLocalizedName(it.originalName, nameKo, locale)
       const rawLoc = it.location || ""
-      const location = isEn
-        ? (locationEnMap[rawLoc] || rawLoc || "Unknown")
-        : (locationKoMap[rawLoc] || rawLoc || "알 수 없음")
+      const location = getLocalizedLocation(rawLoc, locale)
 
       const commonTimes =
         hemi === "north"
@@ -234,7 +229,7 @@ export async function GET(
     }
 
     if (sort) {
-      const sortLocale = isEn ? "en" : "ko"
+      const sortLocale = locale === "en" ? "en" : locale === "ja" ? "ja" : "ko"
       filtered = filtered.slice().sort((a, b) => {
         const pa = a.sell_nook ?? null
         const pb = b.sell_nook ?? null

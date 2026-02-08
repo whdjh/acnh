@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "title": "タムスル図鑑",
+    "description": "あつまれ どうぶつの森 図鑑Webアプリ — 名前・月・時間・半球で一括フィルター、捕獲済みアイテム管理、モバイル最適化。",
+    "ogTitle": "タムスル図鑑",
+    "ogDescription": "あつ森 図鑑Webアプリ — 名前検索、月・時間帯指定（タイムトラベル）、北/南半球切替、捕獲/未捕獲アイテム管理。",
+    "ogAlt": "タムスル図鑑 — あつ森 図鑑Webアプリ",
+    "twitterDescription": "名前・月・時間・半球で一括フィルターできるあつ森図鑑Webアプリ。モバイル最適化、捕獲アイテム管理対応。"
+  },
+  "common": {
+    "appName": "タムスル図鑑",
+    "north": "北半球",
+    "south": "南半球"
+  },
+  "home": {
+    "coupangNotice": "この投稿はCoupang Partnersの活動の一環であり、一定の手数料を受け取っています。",
+    "usernameLabel": "ユーザー名",
+    "usernamePlaceholder": "韓国語または英語で入力してください",
+    "hemisphereLabel": "半球を選択",
+    "hemispherePlaceholder": "半球を選んでください",
+    "loading": "処理中...",
+    "login": "ログイン",
+    "signup": "新規登録",
+    "goToSignup": "新規登録へ",
+    "goToLogin": "ログインへ"
+  },
+  "list": {
+    "titlePrefix": "{username}の",
+    "catalog": "図鑑",
+    "fish": "サカナ",
+    "bug": "ムシ",
+    "sea": "海の幸",
+    "fossil": "化石",
+    "searchPlaceholder": "名前で検索…",
+    "clearSearch": "検索をクリア",
+    "monthPlaceholder": "月",
+    "hourPlaceholder": "時間",
+    "sortPlaceholder": "並べ替え",
+    "all": "すべて",
+    "monthUnit": "{month}月",
+    "hourUnit": "{hour}時",
+    "priceDesc": "価格が高い順",
+    "priceAsc": "価格が安い順",
+    "noItems": "条件に一致するアイテムがありません。",
+    "bells": "ベル",
+    "shadow": "影",
+    "countLabel": "{label} 残り {count}",
+    "monthSelect": "月を選択",
+    "hourSelect": "時間を選択",
+    "sortSelect": "並べ替え",
+    "habitatAll": "すべて",
+    "habitatPond": "池",
+    "habitatRiver": "川",
+    "habitatClifftop": "崖の上",
+    "habitatRiverMouth": "河口",
+    "habitatPier": "桟橋",
+    "habitatSea": "海"
+  },
+  "notFound": {
+    "title": "ページが見つかりません",
+    "description": "リクエストされたページは存在しないか、移動された可能性があります。",
+    "goHome": "ホームに戻る"
+  },
+  "time": {
+    "allDay": "終日",
+    "none": "なし",
+    "noInfo": "情報なし",
+    "hourSuffix": "時"
+  },
+  "error": {
+    "fetchFailed": "データの読み込みに失敗しました。",
+    "loadFailed": "読み込み失敗"
+  },
+  "brand": {
+    "title": "タムスル図鑑",
+    "subtitle": "(TamslDogam)",
+    "appDescription": "あつ森 図鑑Webアプリ",
+    "description": "あつ森 図鑑Webアプリ — 名前・月・時間・半球で一括フィルター、捕獲/未捕獲アイテム管理、モバイル最適化。",
+    "keyFeatures": "主な機能",
+    "screenshots": "スクリーンショット",
+    "screenshotHint": "/og-image.png または実際の画面キャプチャを1〜2枚追加してください。",
+    "feature1": "名前検索（部分一致）、月・時間帯指定（タイムトラベル）、北/南半球切替",
+    "feature2": "捕獲アイテムの自動整理、タブごとの残り数表示",
+    "feature3": "モバイル最適化、広告最小化（認証画面のみ）",
+    "metaTitle": "タムスル図鑑(TamslDogam) — あつ森 図鑑Webアプリ",
+    "metaDescription": "タムスル図鑑は名前・月・時間・半球フィルターと捕獲/未捕獲アイテム管理をサポートするあつ森図鑑Webアプリです。",
+    "faqQ1": "「タムスル図鑑」とは何ですか？",
+    "faqA1": "タムスル図鑑はあつ森図鑑Webアプリで、名前・月・時間・半球フィルターと捕獲/未捕獲アイテム管理機能を提供します。",
+    "faqQ2": "タイムトラベル/半球切替はサポートしていますか？",
+    "faqA2": "はい。カスタム時間設定（タイムトラベル）と北/南半球の切替をサポートしています。",
+    "faqQ3": "アプリのインストールや会員登録は必要ですか？",
+    "faqA3": "ブラウザで直接使用でき、ログインなしでもコア機能を利用できます。"
+  },
+  "languageSwitcher": {
+    "label": "言語"
+  }
+}

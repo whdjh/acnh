@@ -3,7 +3,7 @@ import Script from "next/script"
 import { Suspense } from "react"
 import { NextIntlClientProvider } from "next-intl"
 import { getMessages, getTranslations } from "next-intl/server"
-import { routing } from "@/i18n/routing"
+import { routing, type Locale } from "@/i18n/routing"
 import { notFound } from "next/navigation"
 import "../../styles/globals.css"
 import GtmRouteListener from "../_gtm-route-listener"
@@ -42,7 +42,7 @@ export async function generateMetadata({
           alt: t("ogAlt"),
         },
       ],
-      locale: locale === "ko" ? "ko_KR" : "en_US",
+      locale: locale === "ko" ? "ko_KR" : locale === "ja" ? "ja_JP" : "en_US",
       type: "website",
     },
     twitter: {
@@ -73,7 +73,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params
 
-  if (!routing.locales.includes(locale as "ko" | "en")) {
+  if (!routing.locales.includes(locale as Locale)) {
     notFound()
   }
 

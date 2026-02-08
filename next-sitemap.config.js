@@ -8,9 +8,12 @@ module.exports = {
   additionalPaths: async (config) => [
     await config.transform(config, '/'),
     await config.transform(config, '/en'),
+    await config.transform(config, '/ja'),
     await config.transform(config, '/brand/tamsldogam'),
     await config.transform(config, '/en/brand/tamsldogam'),
+    await config.transform(config, '/ja/brand/tamsldogam'),
     await config.transform(config, '/list'),
     await config.transform(config, '/en/list'),
+    await config.transform(config, '/ja/list'),
   ],
 }
