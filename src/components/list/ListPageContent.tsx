@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
+import { useLocale, useTranslations } from "next-intl"
 import useQueryTab from "@/hook/useQueryTab"
 import type { Category, SortKey, Habitat, Hemisphere } from "@/types/acnh"
 import { formatTimesForMonth } from "@/lib/time"
@@ -17,6 +18,8 @@ import ListHeaderSkeleton from "@/components/list/ListHeaderSkeleton"
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"]
 
 export default function ListPageContent() {
+  const t = useTranslations("list")
+  const locale = useLocale()
   const { activeTab, setTab } = useQueryTab<Category>("tab", "fish", CATEGORY_TABS)
   const user = useLocalUser()
 
@@ -37,6 +40,7 @@ export default function ListPageContent() {
     habitat: activeTab === "fish" ? habitat : undefined,
     search,
     sort,
+    locale,
   })
 
   const { caughtSet, toggleCatch, loading: caughtLoading } = useCaughtItems({
@@ -48,24 +52,19 @@ export default function ListPageContent() {
   const loading = itemsLoading || caughtLoading
   const isAll = selectedMonth === 0
 
-  // 서버에서 월/시간/서식지/검색 필터 완료 → items가 곧 filtered
   const filtered = items
 
-  // 정렬 – 미포획 그룹 먼저 (가격 정렬은 서버에서 완료)
-  // stable sort를 위해 index 기반으로 같은 그룹 내 순서 유지
   const displayed = useMemo(() => {
     const indexed = filtered.map((it, i) => ({ it, i }))
     indexed.sort((a, b) => {
-      const aGroup = caughtSet.has(a.it.originalName) ? 1 : 0 // 0 미포획, 1 포획
+      const aGroup = caughtSet.has(a.it.originalName) ? 1 : 0
       const bGroup = caughtSet.has(b.it.originalName) ? 1 : 0
       if (aGroup !== bGroup) return aGroup - bGroup
-      // 같은 그룹: 서버에서 받은 순서(가격 정렬됨) 유지
       return a.i - b.i
     })
     return indexed.map((x) => x.it)
   }, [filtered, caughtSet])
 
-  // 남은(미포획) 개수 – 현재 필터(월/시간/서식지/검색) 반영
   const remainingCount = useMemo(() => {
     return filtered.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0)
   }, [filtered, caughtSet])
@@ -88,7 +87,7 @@ export default function ListPageContent() {
         activeTab={activeTab}
         onChangeTab={(t) => {
           setTab(t)
-          setHabitat("all") // 물고기 외 탭으로 넘어갈 때 의미 없으므로 리셋
+          setHabitat("all")
         }}
         selectedMonth={selectedMonth}
         onChangeMonth={setSelectedMonth}
@@ -105,13 +104,13 @@ export default function ListPageContent() {
 
       {displayed.length === 0 ? (
         <div className="text-sm text-muted-foreground py-12 text-center">
-          해당 조건에 맞는 항목이 없습니다.
+          {t("noItems")}
         </div>
       ) : (
         <ItemsGrid
           items={displayed}
           caughtSet={caughtSet}
-          timesFor={(it) => (isAll ? "" : formatTimesForMonth(it, selectedMonth, hemi))}
+          timesFor={(it) => (isAll ? "" : formatTimesForMonth(it, selectedMonth, hemi, locale))}
           onToggleCatch={(name) => toggleCatch(name)}
         />
       )}

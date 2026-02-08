@@ -7,7 +7,10 @@ module.exports = {
   exclude: [],
   additionalPaths: async (config) => [
     await config.transform(config, '/'),
+    await config.transform(config, '/en'),
     await config.transform(config, '/brand/tamsldogam'),
+    await config.transform(config, '/en/brand/tamsldogam'),
     await config.transform(config, '/list'),
+    await config.transform(config, '/en/list'),
   ],
 }

@@ -1,15 +1,10 @@
 import type { Item } from "@/types/acnh"
 
-/**
- * 시간 배열을 압축된 문자열 형식으로 변환
- *
- * @param hours - 시간 배열 (0~23)
- * @returns 압축된 시간 문자열
- */
-function compressHourList(hours: number[]): string {
+function compressHourList(hours: number[], locale: string): string {
   const uniq = Array.from(new Set(hours)).sort((a, b) => a - b)
-  if (uniq.length === 24) return "종일"
-  if (uniq.length === 0) return "없음"
+  const isEn = locale === "en"
+  if (uniq.length === 24) return isEn ? "All day" : "종일"
+  if (uniq.length === 0) return isEn ? "None" : "없음"
 
   const ranges: Array<[number, number]> = []
   let s = uniq[0],
@@ -25,16 +20,17 @@ function compressHourList(hours: number[]): string {
   }
   ranges.push([s, prev])
 
+  const hourSuffix = isEn ? ":00" : "시"
+
   return ranges
     .map(([a, b]) =>
       a === b
-        ? `${String(a).padStart(2, "0")}시`
-        : `${String(a).padStart(2, "0")}–${String(b).padStart(2, "0")}시`
+        ? `${String(a).padStart(2, "0")}${hourSuffix}`
+        : `${String(a).padStart(2, "0")}–${String(b).padStart(2, "0")}${hourSuffix}`
     )
     .join(", ")
 }
 
-/** 시계 형식 문자열을 24시간 형식 숫자로 변환 */
 function to24(t: string): number | null {
   const m = t.match(/^(\d{1,2})(?::\d{1,2})?\s*(am|pm)?$/i)
   if (!m) return null
@@ -48,31 +44,29 @@ function to24(t: string): number | null {
   return h >= 0 && h <= 23 ? h : null
 }
 
-/**
- * 아이템의 특정 월 시간 정보를 포맷된 문자열로 반환
- *
- * @param item - 아이템 객체
- * @param month - 월 (1~12)
- * @param hemi - 반구 ("north" | "south")
- * @returns 포맷된 시간 문자열 (예: "04–21시", "종일", "정보 없음")
- */
 export function formatTimesForMonth(
   item: Item,
   month: number,
-  hemi: "north" | "south"
+  hemi: "north" | "south",
+  locale: string = "ko"
 ): string {
+  const isEn = locale === "en"
+  const noInfo = isEn ? "No info" : "정보 없음"
+  const allDay = isEn ? "All day" : "종일"
+  const hourSuffix = isEn ? ":00" : "시"
+
   const key = String(month)
   const val =
     (hemi === "north"
       ? item.north_times_by_month?.[key]
       : item.south_times_by_month?.[key]) ?? item.times_by_month?.[key]
 
-  if (val == null) return "정보 없음"
+  if (val == null) return noInfo
 
   if (typeof val === "string") {
     const s = val.trim()
-    if (!s) return "정보 없음"
-    if (/all\s*day/i.test(s)) return "종일"
+    if (!s) return noInfo
+    if (/all\s*day/i.test(s)) return allDay
 
     const segs = s
       .toLowerCase()
@@ -85,13 +79,13 @@ export function formatTimesForMonth(
           const sh = to24(a),
             eh = to24(b)
           if (sh == null || eh == null) return seg
-          return `${String(sh).padStart(2, "0")}–${String(eh).padStart(2, "0")}시`
+          return `${String(sh).padStart(2, "0")}–${String(eh).padStart(2, "0")}${hourSuffix}`
         }
         const hh = to24(seg)
-        return hh == null ? seg : `${String(hh).padStart(2, "0")}시`
+        return hh == null ? seg : `${String(hh).padStart(2, "0")}${hourSuffix}`
       })
 
-    return segs.length ? segs.join(", ") : "정보 없음"
+    return segs.length ? segs.join(", ") : noInfo
   }
 
   if (
@@ -102,20 +96,20 @@ export function formatTimesForMonth(
     const hours = (val as boolean[])
       .map((ok, h) => (ok ? h : null))
       .filter((h) => h !== null) as number[]
-    return compressHourList(hours)
+    return compressHourList(hours, locale)
   }
 
   if (Array.isArray(val) && val.length > 0 && typeof val[0] === "number") {
     const hours = (val as number[]).filter((h) => h >= 0 && h <= 23)
-    return compressHourList(hours)
+    return compressHourList(hours, locale)
   }
 
   if (Array.isArray(val) && val.length > 0 && typeof val[0] === "object") {
     const parts = (val as Array<{ start: string; end: string }>).map(
       (r) => `${r.start}–${r.end}`
     )
-    return parts.length ? parts.join(", ") : "정보 없음"
+    return parts.length ? parts.join(", ") : noInfo
   }
 
-  return "정보 없음"
+  return noInfo
 }

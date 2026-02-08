@@ -1,42 +1,31 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import type { Item } from "@/types/acnh"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 interface ItemsGridProps {
-  /** 표시할 아이템 목록 */
   items: Item[]
-  /** 잡은 아이템 이름 Set */
   caughtSet: Set<string>
-  /** 아이템의 시간 정보를 문자열로 변환하는 함수 */
   timesFor: (item: Item) => string
-  /** 아이템 잡기/풀기 토글 핸들러 */
   onToggleCatch: (name: string) => void
 }
 
-/**
- * 아이템 그리드 컴포넌트
- * 
- * 3열 그리드 레이아웃으로 아이템을 표시하며, 각 아이템은 카드 형태로 렌더링됩니다.
- * 잡은 아이템은 시각적으로 구분되며, 클릭 시 잡기/풀기 상태를 토글할 수 있습니다.
- * 
- * @param props - ItemsGridProps
- */
 export default function ItemsGrid({
   items,
   caughtSet,
   timesFor,
   onToggleCatch,
 }: ItemsGridProps) {
+  const t = useTranslations("list")
+
   return (
     <div className="grid grid-cols-3 gap-3">
       {items.map((item, index) => {
         const isCaught = caughtSet.has(item.originalName)
         const timesText = timesFor(item)
-        // 첫 6개 이미지에 priority 적용 (LCP 최적화)
-        // 3열 그리드에서 화면에 보이는 첫 2행을 우선 로드합니다
         const isLcpImage = index < 6
 
         return (
@@ -76,14 +65,13 @@ export default function ItemsGrid({
 
                 {typeof item.sell_nook === "number" && (
                   <div className="text-xs text-muted-foreground/80">
-                    {item.sell_nook.toLocaleString()} 벨
+                    {item.sell_nook.toLocaleString()} {t("bells")}
                   </div>
                 )}
 
-                {/* ← 추가: 그림자 크기 표시 (벨 아래) */}
                 {item.shadow_size && (
                   <div className="text-[11px] text-muted-foreground/80">
-                    그림자: {item.shadow_size}
+                    {t("shadow")}: {item.shadow_size}
                   </div>
                 )}
               </div>

@@ -15,16 +15,12 @@ type UseAcnhItemsOpts = {
   enabled: boolean
   category: Category
   hemisphere: Hemisphere
-  /** 월: 1~12, 전체는 0 */
   month: number
-  /** 시간: 0~23, 월이 0이면 무시됨 */
   hour?: number
-  /** 서식지 필터 (fish 전용) */
   habitat?: Habitat
-  /** 검색어 (한글/영어 이름 검색) */
   search?: string
-  /** 정렬 */
   sort?: SortKey
+  locale?: string
 }
 
 export function useAcnhItems({
@@ -36,6 +32,7 @@ export function useAcnhItems({
   habitat,
   search,
   sort,
+  locale,
 }: UseAcnhItemsOpts) {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(false)
@@ -47,7 +44,6 @@ export function useAcnhItems({
   const load = useCallback(async () => {
     if (!enabled) return
 
-    // 이전 요청 취소
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
@@ -66,27 +62,26 @@ export function useAcnhItems({
         _t: String(Date.now()),
       })
 
-      // 월 모드(1~12)면 서버측 필터 사용, 전체(0)면 월 파라미터 생략
+      if (locale) {
+        params.set("locale", locale)
+      }
+
       if (!isAll) {
         params.set("month", String(month))
         params.set("only", "1")
-        // 시간 필터도 서버 위임 (월 모드일 때만 의미 있음)
         if (hour !== undefined && hour >= 0 && hour <= 23) {
           params.set("hour", String(hour))
         }
       }
 
-      // 서식지 필터 (fish 전용, 월과 무관하게 적용)
       if (habitat && habitat !== "all") {
         params.set("habitat", habitat)
       }
 
-      // 검색 필터
       if (search && search.trim()) {
         params.set("search", search.trim())
       }
 
-      // 정렬
       if (sort) {
         params.set("sort", sort)
       }
@@ -108,7 +103,7 @@ export function useAcnhItems({
     } catch (e: unknown) {
       if (reqKeyRef.current !== myKey) return
       if (e instanceof Error && e.name === "AbortError") return
-      setError("데이터를 불러오지 못했습니다.")
+      setError("Failed to load data")
     } finally {
       if (reqKeyRef.current === myKey) {
         setLoading(false)
@@ -117,7 +112,7 @@ export function useAcnhItems({
         }
       }
     }
-  }, [enabled, category, hemisphere, month, hour, habitat, search, sort])
+  }, [enabled, category, hemisphere, month, hour, habitat, search, sort, locale])
 
   useEffect(() => {
     void load()
