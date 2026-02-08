@@ -324,20 +324,20 @@ const shadowSizeMap: Record<string, string> = {
   "특대(지느러미)": "Largest (Fin)",
   "특대": "Largest",
   "큼": "Large",
-  "약간큼": "Medium-Large",
-  "긴": "Narrow",
+  "약간 큼": "Medium-Large",
+  "김": "Narrow",
   "중간": "Medium",
   "작음": "Small",
-  "매우작음": "Smallest",
+  "매우 작음": "Smallest",
   // 영어 → 한국어 (DB에 영어가 저장된 경우)
   "Largest (Fin)": "특대(지느러미)",
   "Largest": "특대",
   "Large": "큼",
-  "Medium-Large": "약간큼",
-  "Narrow": "긴",
+  "Medium-Large": "약간 큼",
+  "Narrow": "김",
   "Medium": "중간",
   "Small": "작음",
-  "Smallest": "매우작음",
+  "Smallest": "매우 작음",
 }
 
 /**
