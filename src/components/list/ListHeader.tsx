@@ -12,25 +12,36 @@ import { Input } from "@/components/ui/input"
 import { X } from "lucide-react"
 import type { Category, Habitat, Hemisphere } from "@/types/acnh"
 
-/**
- * 리스트 헤더 컴포넌트의 Props
- */
+/** 리스트 헤더 컴포넌트의 Props */
 interface ListHeaderProps {
+  /** 사용자 이름 */
   username: string
+  /** 반구 */
   hemisphere: Hemisphere
+  /** 탭 */
   tabs: Category[]
+  /** 활성 탭 */
   activeTab: Category
+  /** 탭 변경 핸들러 */
   onChangeTab: (t: Category) => void
+  /** 선택된 월 */
   selectedMonth: number
+  /** 월 변경 핸들러 */
   onChangeMonth: (m: number) => void
+  /** 선택된 시간 */
   selectedHour: number
+  /** 시간 변경 핸들러 */
   onChangeHour: (h: number) => void
+  /** 카테고리별 아이템 개수 */
   counts?: Partial<Record<Category, number>>
+  /** 검색어 */
   searchTerm: string
+  /** 검색어 변경 핸들러 */
   onChangeSearch: (v: string) => void
+  /** 정렬 */
   sort: "priceDesc" | "priceAsc"
+  /** 정렬 변격 핸들러 */
   onChangeSort: (v: "priceDesc" | "priceAsc") => void
-
   /** 물고기 전용 서식지 필터 (물고기 카테고리에서만 사용) */
   habitat: Habitat
   /** 서식지 변경 핸들러 */

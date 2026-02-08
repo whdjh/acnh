@@ -42,14 +42,22 @@ export function useAcnhItems({
   const [error, setError] = useState<string | null>(null)
 
   const reqKeyRef = useRef(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const load = useCallback(async () => {
     if (!enabled) return
-    setLoading(true)
-    setError(null)
+
+    // 이전 요청 취소
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
 
     const myKey = ++reqKeyRef.current
     const ac = new AbortController()
+    abortControllerRef.current = ac
+
+    setLoading(true)
+    setError(null)
 
     try {
       const isAll = month === 0
@@ -97,23 +105,28 @@ export function useAcnhItems({
       }))
 
       if (reqKeyRef.current === myKey) setItems(formatted)
-    } catch (e) {
-      if (e instanceof Error && e.name !== "AbortError") {
-        console.error("GET /api/items failed:", e)
-        if (reqKeyRef.current === myKey) {
-          setItems([])
-          setError(e.message ?? "데이터를 불러오지 못했습니다.")
+    } catch (e: unknown) {
+      if (reqKeyRef.current !== myKey) return
+      if (e instanceof Error && e.name === "AbortError") return
+      setError("데이터를 불러오지 못했습니다.")
+    } finally {
+      if (reqKeyRef.current === myKey) {
+        setLoading(false)
+        if (abortControllerRef.current === ac) {
+          abortControllerRef.current = null
         }
       }
-    } finally {
-      if (reqKeyRef.current === myKey) setLoading(false)
     }
-
-    return () => ac.abort()
   }, [enabled, category, hemisphere, month, hour, habitat, search, sort])
 
   useEffect(() => {
-    load()
+    void load()
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+        abortControllerRef.current = null
+      }
+    }
   }, [load])
 
   const refetch = useCallback(() => {

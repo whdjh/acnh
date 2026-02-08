@@ -19,15 +19,23 @@ export function useCaughtItems({
 
   // 최신 요청만 반영하기 위한 토큰
   const reqKeyRef = useRef(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   /** GET /api/caught */
   const doFetch = useCallback(async () => {
     if (!enabled || !userId) return
-    setLoading(true)
-    setError(null)
+
+    // 이전 요청 취소
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
 
     const myKey = ++reqKeyRef.current
     const ac = new AbortController()
+    abortControllerRef.current = ac
+
+    setLoading(true)
+    setError(null)
 
     try {
       const params = new URLSearchParams({
@@ -47,15 +55,19 @@ export function useCaughtItems({
         setCaughtSet(new Set(data.items ?? []))
       }
     } catch (e) {
+      if (reqKeyRef.current !== myKey) return
       if (e instanceof Error && e.name !== "AbortError") {
         console.error("GET /api/caught failed:", e)
-        if (reqKeyRef.current === myKey) {
-          setCaughtSet(new Set())
-          setError(e.message ?? "불러오기 실패")
-        }
+        setCaughtSet(new Set())
+        setError(e.message ?? "불러오기 실패")
       }
     } finally {
-      if (reqKeyRef.current === myKey) setLoading(false)
+      if (reqKeyRef.current === myKey) {
+        setLoading(false)
+        if (abortControllerRef.current === ac) {
+          abortControllerRef.current = null
+        }
+      }
     }
   }, [enabled, userId, category])
 
@@ -67,7 +79,13 @@ export function useCaughtItems({
       setLoading(false)
       return
     }
-    doFetch()
+    void doFetch()
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+        abortControllerRef.current = null
+      }
+    }
   }, [enabled, userId, category, doFetch])
 
   /** POST /api/caught/toggle (낙관적 업데이트 포함) */

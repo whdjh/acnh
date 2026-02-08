@@ -1,16 +1,10 @@
-// 시간 포맷 유틸
-
 import type { Item } from "@/types/acnh"
 
 /**
- * 시간 배열을 압축된 문자열 형식으로 변환합니다.
+ * 시간 배열을 압축된 문자열 형식으로 변환
  *
  * @param hours - 시간 배열 (0~23)
  * @returns 압축된 시간 문자열
- * @example
- * compressHourList([4, 5, 6, 7, 8]) → "04–08시"
- * compressHourList([0, 1, 2, ..., 23]) → "종일"
- * compressHourList([4, 6, 8]) → "04시, 06시, 08시"
  */
 function compressHourList(hours: number[]): string {
   const uniq = Array.from(new Set(hours)).sort((a, b) => a - b)
@@ -40,9 +34,7 @@ function compressHourList(hours: number[]): string {
     .join(", ")
 }
 
-/**
- * 시계 형식 문자열을 24시간 형식 숫자로 변환합니다.
- */
+/** 시계 형식 문자열을 24시간 형식 숫자로 변환 */
 function to24(t: string): number | null {
   const m = t.match(/^(\d{1,2})(?::\d{1,2})?\s*(am|pm)?$/i)
   if (!m) return null
@@ -57,7 +49,7 @@ function to24(t: string): number | null {
 }
 
 /**
- * 아이템의 특정 월 시간 정보를 포맷된 문자열로 반환합니다.
+ * 아이템의 특정 월 시간 정보를 포맷된 문자열로 반환
  *
  * @param item - 아이템 객체
  * @param month - 월 (1~12)

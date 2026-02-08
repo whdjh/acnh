@@ -20,7 +20,7 @@ export function useLocalUser(): { id: number; username: string; hemisphere: "nor
       const parsedUser = JSON.parse(raw) as { id: number; username: string; hemisphere: "north" | "south" }
       setUser(parsedUser)
     } catch (error) {
-      console.error("Failed to parse user data from localStorage:", error)
+      console.error(error)
       localStorage.removeItem(USER_STORAGE_KEY)
       window.location.href = LOGIN_PAGE_PATH
     }
