@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "title": "TamslDogam",
+    "description": "Animal Crossing: New Horizons catalog web app — Filter by name, month, time, and hemisphere. Track caught items. Mobile optimized.",
+    "ogTitle": "TamslDogam",
+    "ogDescription": "ACNH Catalog Web App — Name search, month/time selection (time travel), North/South hemisphere toggle, caught/remaining item management.",
+    "ogAlt": "TamslDogam — ACNH Catalog Web App",
+    "twitterDescription": "ACNH catalog web app with name, month, time, and hemisphere filters. Mobile optimized, caught item tracking."
+  },
+  "common": {
+    "appName": "TamslDogam",
+    "north": "Northern",
+    "south": "Southern"
+  },
+  "home": {
+    "coupangNotice": "This post is part of the Coupang Partners program, and a commission is earned accordingly.",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Enter in Korean or English",
+    "hemisphereLabel": "Select Hemisphere",
+    "hemispherePlaceholder": "Choose hemisphere",
+    "loading": "Processing...",
+    "login": "Log In",
+    "signup": "Sign Up",
+    "goToSignup": "Go to Sign Up",
+    "goToLogin": "Go to Log In"
+  },
+  "list": {
+    "titlePrefix": "{username}'s",
+    "catalog": "Catalog",
+    "fish": "Fish",
+    "bug": "Bugs",
+    "sea": "Sea Creatures",
+    "fossil": "Fossils",
+    "searchPlaceholder": "Search by name…",
+    "clearSearch": "Clear search",
+    "monthPlaceholder": "Month",
+    "hourPlaceholder": "Hour",
+    "sortPlaceholder": "Sort",
+    "all": "All",
+    "monthUnit": "Month {month}",
+    "hourUnit": "{hour}:00",
+    "priceDesc": "Price: High to Low",
+    "priceAsc": "Price: Low to High",
+    "noItems": "No items match the current filters.",
+    "bells": "Bells",
+    "shadow": "Shadow",
+    "countLabel": "{label} count {count}",
+    "monthSelect": "Select month",
+    "hourSelect": "Select hour",
+    "sortSelect": "Sort",
+    "habitatAll": "All",
+    "habitatPond": "Pond",
+    "habitatRiver": "River",
+    "habitatClifftop": "River (Clifftop)",
+    "habitatRiverMouth": "River (Mouth)",
+    "habitatPier": "Pier",
+    "habitatSea": "Sea"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you requested does not exist or may have been moved.",
+    "goHome": "Return Home"
+  },
+  "time": {
+    "allDay": "All day",
+    "none": "None",
+    "noInfo": "No info",
+    "hourSuffix": ":00"
+  },
+  "error": {
+    "fetchFailed": "Failed to load data.",
+    "loadFailed": "Load failed"
+  },
+  "brand": {
+    "title": "TamslDogam",
+    "subtitle": "(탐슬도감)",
+    "appDescription": "ACNH Catalog Web App",
+    "description": "ACNH Catalog Web App — Filter by name, month, time, and hemisphere at once. Track caught items. Mobile optimized.",
+    "keyFeatures": "Key Features",
+    "screenshots": "Screenshots",
+    "screenshotHint": "Add 1-2 screenshots from /og-image.png or actual screen captures.",
+    "feature1": "Name search (partial match), month/time selection (time travel), North/South hemisphere toggle",
+    "feature2": "Auto-organize caught items, remaining count per tab",
+    "feature3": "Mobile optimized, minimal ads (auth screen only)",
+    "metaTitle": "TamslDogam — ACNH Catalog Web App",
+    "metaDescription": "TamslDogam is an ACNH catalog web app supporting name, month, time, and hemisphere filters with caught/remaining item management.",
+    "faqQ1": "What is TamslDogam?",
+    "faqA1": "TamslDogam is an ACNH catalog web app providing name, month, time, and hemisphere filters with caught/remaining item management.",
+    "faqQ2": "Does it support time travel and hemisphere switching?",
+    "faqA2": "Yes. It supports custom time settings (time travel) and North/South hemisphere toggle.",
+    "faqQ3": "Do I need to install an app or sign up?",
+    "faqA3": "You can use it directly in your browser. Core features are available without login."
+  },
+  "languageSwitcher": {
+    "label": "Language"
+  }
+}

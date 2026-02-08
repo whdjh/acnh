@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "title": "탐슬도감",
+    "description": "모여봐요 동물의 숲 도감 웹앱 — 이름·월·시간·반구 한 번에 필터, 잡은 항목 정리, 모바일 최적화.",
+    "ogTitle": "탐슬도감",
+    "ogDescription": "모동숲 도감 웹앱 — 이름 검색, 월·시간대 지정(타임슬립), 북/남반구 토글, 잡은/남은 항목 관리.",
+    "ogAlt": "탐슬도감 — 모동숲 도감 웹앱",
+    "twitterDescription": "이름·월·시간·반구 한 번에 필터되는 모동숲 도감 웹앱. 모바일 최적화, 잡은 항목 정리 지원."
+  },
+  "common": {
+    "appName": "탐슬도감",
+    "north": "북반구",
+    "south": "남반구"
+  },
+  "home": {
+    "coupangNotice": "이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.",
+    "usernameLabel": "아이디",
+    "usernamePlaceholder": "한글 또는 영어로 입력하세요",
+    "hemisphereLabel": "반구 선택",
+    "hemispherePlaceholder": "반구를 선택하세요",
+    "loading": "처리 중...",
+    "login": "로그인",
+    "signup": "회원가입",
+    "goToSignup": "회원가입으로 이동",
+    "goToLogin": "로그인으로 이동"
+  },
+  "list": {
+    "titlePrefix": "{username}님의",
+    "catalog": "도감",
+    "fish": "물고기",
+    "bug": "곤충",
+    "sea": "해양생물",
+    "fossil": "화석",
+    "searchPlaceholder": "이름으로 검색…",
+    "clearSearch": "검색어 지우기",
+    "monthPlaceholder": "월",
+    "hourPlaceholder": "시간",
+    "sortPlaceholder": "정렬",
+    "all": "전체",
+    "monthUnit": "{month}월",
+    "hourUnit": "{hour}시",
+    "priceDesc": "가격 높은 순",
+    "priceAsc": "가격 낮은 순",
+    "noItems": "해당 조건에 맞는 항목이 없습니다.",
+    "bells": "벨",
+    "shadow": "그림자",
+    "countLabel": "{label} 개수 {count}",
+    "monthSelect": "월 선택",
+    "hourSelect": "시간 선택",
+    "sortSelect": "정렬",
+    "habitatAll": "전체",
+    "habitatPond": "연못",
+    "habitatRiver": "강",
+    "habitatClifftop": "강(절벽 위)",
+    "habitatRiverMouth": "강(하구)",
+    "habitatPier": "부두",
+    "habitatSea": "바다"
+  },
+  "notFound": {
+    "title": "페이지를 찾을 수 없습니다",
+    "description": "요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.",
+    "goHome": "홈으로 돌아가기"
+  },
+  "time": {
+    "allDay": "종일",
+    "none": "없음",
+    "noInfo": "정보 없음",
+    "hourSuffix": "시"
+  },
+  "error": {
+    "fetchFailed": "데이터를 불러오지 못했습니다.",
+    "loadFailed": "불러오기 실패"
+  },
+  "brand": {
+    "title": "탐슬도감",
+    "subtitle": "(TamslDogam)",
+    "appDescription": "모동숲 도감 웹앱",
+    "description": "모동숲 도감 웹앱 — 이름·월·시간·반구 한 번에 필터, 잡은/남은 항목 정리, 모바일 최적화.",
+    "keyFeatures": "핵심 기능",
+    "screenshots": "스크린샷",
+    "screenshotHint": "/og-image.png 또는 실제 화면 캡처를 1–2장 추가하세요.",
+    "feature1": "이름 검색(한글 부분일치), 월·시간대 지정(타임슬립), 북/남반구 토글",
+    "feature2": "잡은 항목 자동 정리, 탭별 남은 개수 표시",
+    "feature3": "모바일 최적화, 광고 최소화(인증 화면 한정)",
+    "metaTitle": "탐슬도감(TamslDogam) — 모동숲 도감 웹앱",
+    "metaDescription": "탐슬도감은 이름·월·시간·반구 필터와 잡은/남은 항목 관리를 지원하는 모동숲 도감 웹앱입니다.",
+    "faqQ1": "'탐슬도감'은 무엇인가요?",
+    "faqA1": "탐슬도감은 모동숲 도감 웹앱으로, 이름·월·시간·반구 필터와 잡은/남은 항목 관리 기능을 제공합니다.",
+    "faqQ2": "타임슬립/반구 전환은 지원하나요?",
+    "faqA2": "네. 사용자 지정 시간(타임슬립)과 북/남반구 토글을 지원합니다.",
+    "faqQ3": "앱 설치나 회원가입이 꼭 필요한가요?",
+    "faqA3": "브라우저에서 바로 사용할 수 있으며, 로그인 없이도 핵심 기능을 이용할 수 있습니다."
+  },
+  "languageSwitcher": {
+    "label": "언어"
+  }
+}

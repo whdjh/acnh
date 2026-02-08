@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -10,6 +11,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select"
+import LanguageSwitcher from "@/components/LanguageSwitcher"
 
 type Mode = "login" | "signup"
 type Hemisphere = "north" | "south"
@@ -20,9 +22,6 @@ interface AdItem {
   alt: string
 }
 
-// ─────────────────────────────────────────────────────────────
-// 광고 데이터 (6개) — 하단 6열로 렌더
-// ─────────────────────────────────────────────────────────────
 const TOP_ADS: AdItem[] = [
   {
     href: "https://link.coupang.com/a/cV8jpN",
@@ -59,12 +58,8 @@ const BOTTOM_ADS: AdItem[] = [
   },
 ]
 
-// 하단에 6개 표시
 const ALL_ADS: AdItem[] = [...TOP_ADS, ...BOTTOM_ADS]
 
-// ─────────────────────────────────────────────────────────────
-// 6열 광고 그리드 (맨 하단)
-// ─────────────────────────────────────────────────────────────
 function AdGrid6({ items }: { items: AdItem[] }) {
   return (
     <div className="mx-auto w-full max-w-5xl py-3 grid grid-cols-6 gap-2">
@@ -91,6 +86,8 @@ function AdGrid6({ items }: { items: AdItem[] }) {
 }
 
 export default function HomePage() {
+  const t = useTranslations("home")
+  const tc = useTranslations("common")
   const [mode, setMode] = useState<Mode>("login")
   const [username, setUsername] = useState("")
   const [hemisphere, setHemisphere] = useState<Hemisphere>("north")
@@ -131,53 +128,48 @@ export default function HomePage() {
     }
   }
   return (
-    // 상단 공지, 중앙 카드, 하단 광고(6열)
     <div className="min-h-[calc(100dvh-4rem)] flex flex-col">
-      {/* 상단 제휴 공지 */}
-      <header className="w-full px-4 pt-4">
-        <div className="mx-auto w-full max-w-3xl rounded-xl bg-red-600 text-black text-center text-xs sm:text-sm font-medium px-3 py-1.5">
-          이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+      <header className="w-full px-4 pt-4 flex items-start justify-between gap-2">
+        <div className="flex-1 mx-auto max-w-3xl rounded-xl bg-red-600 text-black text-center text-xs sm:text-sm font-medium px-3 py-1.5">
+          {t("coupangNotice")}
         </div>
+        <LanguageSwitcher />
       </header>
-      {/* 중앙 카드 영역: 세로·가로 센터 */}
       <main className="flex-1 flex items-center justify-center px-4">
         <div className="w-full max-w-sm rounded-2xl border border-white/10 backdrop-blur p-5 shadow-sm">
           <div className="flex flex-col gap-3">
-            {/* 아이디 */}
-            <label className="text-sm text-muted-foreground">아이디</label>
+            <label className="text-sm text-muted-foreground">{t("usernameLabel")}</label>
             <Input
-              placeholder="한글 또는 영어로 입력하세요"
+              placeholder={t("usernamePlaceholder")}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onKeyDown={onKeyDown}
             />
-            {/* 회원가입에서만 반구 선택 */}
             {mode === "signup" && (
               <div className="flex flex-col gap-1">
-                <label className="text-sm text-muted-foreground">반구 선택</label>
+                <label className="text-sm text-muted-foreground">{t("hemisphereLabel")}</label>
                 <Select
                   value={hemisphere}
                   onValueChange={(v) => setHemisphere(v as Hemisphere)}
                   disabled={loading}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="반구를 선택하세요" />
+                    <SelectValue placeholder={t("hemispherePlaceholder")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="north">북반구</SelectItem>
-                    <SelectItem value="south">남반구</SelectItem>
+                    <SelectItem value="north">{tc("north")}</SelectItem>
+                    <SelectItem value="south">{tc("south")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             )}
 
-            {/* 액션 */}
             <Button
               className="w-full"
               onClick={handleSubmit}
               disabled={loading || username.trim().length === 0}
             >
-              {loading ? "처리 중..." : mode === "login" ? "로그인" : "회원가입"}
+              {loading ? t("loading") : mode === "login" ? t("login") : t("signup")}
             </Button>
 
             <Button
@@ -187,13 +179,12 @@ export default function HomePage() {
               onClick={() => setMode((m) => (m === "login" ? "signup" : "login"))}
               disabled={loading}
             >
-              {mode === "login" ? "회원가입으로 이동" : "로그인으로 이동"}
+              {mode === "login" ? t("goToSignup") : t("goToLogin")}
             </Button>
           </div>
         </div>
       </main>
 
-      {/* 하단 광고 (6열, 전체 폭) */}
       <footer className="w-full px-4 pb-3">
         <AdGrid6 items={ALL_ADS} />
       </footer>
