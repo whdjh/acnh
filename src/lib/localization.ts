@@ -317,6 +317,43 @@ export const locationKoMap: Record<string, string> = {
   "Museum": "박물관",
 }
 
+// ======================================================================
+// 그림자 크기 번역 매핑
+// ======================================================================
+const shadowSizeMap: Record<string, string> = {
+  "특대(지느러미)": "Largest (Fin)",
+  "특대": "Largest",
+  "큼": "Large",
+  "약간큼": "Medium-Large",
+  "긴": "Narrow",
+  "중간": "Medium",
+  "작음": "Small",
+  "매우작음": "Smallest",
+  // 영어 → 한국어 (DB에 영어가 저장된 경우)
+  "Largest (Fin)": "특대(지느러미)",
+  "Largest": "특대",
+  "Large": "큼",
+  "Medium-Large": "약간큼",
+  "Narrow": "긴",
+  "Medium": "중간",
+  "Small": "작음",
+  "Smallest": "매우작음",
+}
+
+/**
+ * 그림자 크기를 로케일에 맞게 변환
+ * DB에 한국어든 영어든 저장되어 있어도 올바른 언어로 반환
+ */
+export function getLocalizedShadowSize(raw: string, locale: string): string {
+  if (!raw) return ""
+  if (locale === "en") {
+    // 한국어 → 영어, 이미 영어면 그대로
+    return shadowSizeMap[raw] ?? raw
+  }
+  // 영어 → 한국어, 이미 한국어면 그대로
+  return shadowSizeMap[raw] ?? raw
+}
+
 // 한국어 → 영어 역매핑 (DB에 한국어가 저장된 경우 대비)
 export const locationEnMap: Record<string, string> = Object.fromEntries(
   Object.entries(locationKoMap).map(([en, ko]) => [ko, en])

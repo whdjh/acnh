@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { acnhItems, acnhAvailability } from "@/db/schema"
 import { eq, inArray } from "drizzle-orm"
-import { nameKoMap, locationKoMap, nameEnMap, locationEnMap } from "@/lib/localization"
+import { nameKoMap, locationKoMap, nameEnMap, locationEnMap, getLocalizedShadowSize } from "@/lib/localization"
 import type { Category, Habitat } from "@/types/acnh"
 
 const VALID_CATEGORIES: Category[] = ["fish", "bug", "sea", "fossil"]
@@ -193,7 +193,7 @@ export async function GET(
         image_url: it.imageUrl,
         sell_nook: it.sellNook ?? undefined,
         location,
-        shadow_size: it.shadowSize ?? undefined,
+        shadow_size: it.shadowSize ? getLocalizedShadowSize(it.shadowSize, locale) : undefined,
         north: { months_array: northMonths },
         south: { months_array: southMonths },
         north_times_by_month: box.northTimes,
