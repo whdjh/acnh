@@ -13,7 +13,7 @@ import { useAcnhItems } from "@/hook/useAcnhItems"
 import ListHeader from "@/components/list/ListHeader"
 import ItemsGrid from "@/components/list/ItemsGrid"
 import ItemsGridSkeleton from "@/components/list/ItemsGridSkeleton"
-import ListHeaderSkeleton from "@/components/list/ListHeaderSkeleton"
+import { getListPageSections } from "@/components/list/listPageViewState"
 
 const CATEGORY_TABS: Category[] = ["fish", "bug", "sea", "fossil"]
 
@@ -69,14 +69,10 @@ export default function ListPageContent() {
     return filtered.reduce((acc, it) => acc + (caughtSet.has(it.originalName) ? 0 : 1), 0)
   }, [filtered, caughtSet])
 
-  if (loading) {
-    return (
-      <>
-        <ListHeaderSkeleton />
-        <ItemsGridSkeleton count={9} />
-      </>
-    )
-  }
+  const sections = getListPageSections({
+    loading,
+    displayedCount: displayed.length,
+  })
 
   return (
     <>
@@ -102,7 +98,9 @@ export default function ListPageContent() {
         onChangeHabitat={setHabitat}
       />
 
-      {displayed.length === 0 ? (
+      {sections.body === "loading" ? (
+        <ItemsGridSkeleton count={9} />
+      ) : sections.body === "empty" ? (
         <div className="text-sm text-muted-foreground py-12 text-center">
           {t("noItems")}
         </div>
